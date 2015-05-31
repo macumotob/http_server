@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>maxbuk fm</title>
+ <!--link 	rel="stylesheet" type="text/css" href="fm.css"-->
+  <script type="text/javascript" src="loader.js"></script>
+</head>
+ <body>
+<script type="text/javascript">
+  var link = "fm.css";
+ 
+ if (navigator.userAgent.indexOf("Windows Phone") !== -1) {
+   link = "wp.css";
+   //<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+   //<meta name="HandheldFriendly" content="true">
+  
+   var meta = document.createElement('meta');
+   meta.name = "viewport";
+   meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
+   document.getElementsByTagName('head')[0].appendChild(meta);
+
+   meta.name = "HandheldFriendly";
+   meta.content = "true";
+   document.getElementsByTagName('head')[0].appendChild(meta);
+ }
+// alert(link + "\n" + navigator.userAgent);
+  load_style(link, function () {
+    load_async("content.html", function (text) {
+     // alert(text);
+      // document.write(text);
+      document.body.innerHTML = text;
+
+     // document.body.onload = function () {
+        load_script("fm.js", function () {
+          init_document("root");
+          load_script("coba_upload.js", function () { });
+        });
+    //  };
+    });
+  });
+</script>
+
+<!--
+   <div id="main-div">
+
+     <div id="top-menu">
+      <table id="table-images" >
+         <tr>
+          <td onclick="init_document('root');"><img src="img/go_home.png"/></td>
+          <td onclick="init_document('..');"><img src="img/go_back.png" /></td>
+
+          <td onclick="create_upload_form();"><img src="img/upload.png" /></td>
+          <td onclick="show_create_folder()"><img src="img/create_folder.png" /></td>
+          <td onclick="make_popup();" id="breadcrumb"><img src="img/menu.png" /></td>
+        </tr>
+</table>
+<table width="100%">
+ <tr><td id="td-path" style="font-size:0.5em"></td></tr>
+</table>
+    </div>
+     <div id="left-menu"></div>
+  </div>
+
+   <script type="text/javascript">
+     load_script("fm.js", function () {
+       init_document("root");
+       load_script("coba_upload.js", function () {});
+     });
+   </script>
+-->
+</body>
+</html>

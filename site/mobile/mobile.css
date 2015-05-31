@@ -1,0 +1,24 @@
+﻿body {
+ background-color:green;
+ color:white;
+ padding:0;
+ margin:0;
+}
+#main-div{
+ padding:9px;
+ height:60%;
+ overflow:scroll;
+}
+.table-as-menu{
+ width:98%;
+ height:80%;
+ background-color:yellowgreen;
+}
+  .table-as-menu tr {
+    background-color: red;
+   
+  }
+.table-as-menu td{
+background-color:green;
+font-size :2em;
+}

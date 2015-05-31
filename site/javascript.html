@@ -1,0 +1,410 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+  <style>
+    .pre-header{
+      background-color:black;
+      color:white;
+      width:100%;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+ <h1>continue with page 107</h1>
+  <pre>
+  A new &lt;script&gt; element can be created very easily using standard DOM methods:
+
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+
+  //Firefox, Opera, Chrome, Safari 3+
+  script.onload = function(){
+    alert("Script loaded!");
+  };
+
+  script.src = "file1.js";
+  document.getElementsByTagName("head")[0].appendChild(script);
+  </pre>
+  <pre>
+
+    The following function encapsulates both the standard and IE-specific functionality:
+
+function loadScript(url, callback){
+
+ var script = document.createElement("script")
+ script.type = "text/javascript";
+
+ if (script.readyState){ //IE
+   script.onreadystatechange = function(){
+     if (script.readyState == "loaded" || script.readyState == "complete"){
+     script.onreadystatechange = null;
+     callback();
+     }
+   };
+ } 
+ else { //Others
+    script.onload = function(){
+    callback();
+   };
+ }
+ script.src = url;
+ document.getElementsByTagName("head")[0].appendChild(script);
+}
+
+    The loadScript() function is used as follows:
+
+loadScript("file1.js", function(){
+ alert("File is loaded!");
+});
+
+     You can guarantee the order by chaining the downloads together, such as:
+
+loadScript("file1.js", function(){
+ loadScript("file2.js", function(){
+ loadScript("file3.js", function(){
+ alert("All files are loaded!");
+ });
+ });
+});
+
+</pre>
+  <div class="pre-header">Recommended Nonblocking Pattern</div>
+  <pre>
+  &lt;script type="text/javascript" src="loader.js"&gt;&lt;/script&gt;
+  &lt;script type="text/javascript"&gt;
+  loadScript("the-rest.js", function () {
+    Application.init();
+  });
+        &lt;/script&gt;
+ </pre>
+  <div class="pre-header">Using XMLHttpRequest to load script</div>
+  <pre>
+var xhr = new XMLHttpRequest();
+xhr.open("get", "file1.js", true);
+
+xhr.onreadystatechange = function(){
+ if (xhr.readyState == 4){
+   if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304){
+     var script = document.createElement("script");
+     script.type = "text/javascript";
+     script.text = xhr.responseText;
+     document.body.appendChild(script);
+   }
+ }
+};
+xhr.send(null);
+
+</pre>
+  <div class="pre-header">LoadScript function</div>
+  <pre>
+      function loadScript(url, callback) {
+        var script = document.createElement("script")
+        script.type = "text/javascript";
+        if (script.readyState) { //IE
+          script.onreadystatechange = function () {
+            if (script.readyState == "loaded" ||
+            script.readyState == "complete") {
+              script.onreadystatechange = null;
+              callback();
+            }
+          };
+        } else { //Others
+          script.onload = function () {
+            callback();
+          };
+        }
+        script.src = url;
+        document.getElementsByTagName("head")[0].appendChild(script);
+      }
+      loadScript("the-rest.js", function () {
+        Application.init();
+      });
+
+</pre>
+
+
+  <div class="pre-header">Summary</div>
+  <pre>
+    
+Managing JavaScript in the browser is tricky because code execution blocks other
+browser processes such as UI painting. Every time a &lt;script&gt;
+tag is encountered, the
+  page must stop and wait for the code to download (if external) and execute before
+  continuing to process the rest of the page. There are, however, several ways to minimize
+  the performance impact of JavaScript:
+  • Put all &lt;script&gt; tags at the bottom of the page, just inside of the closing &lt;/body&gt;
+  tag. This ensures that the page can be almost completely rendered before script
+  execution begins.
+  • Group scripts together. The fewer &lt;script&gt; tags on the page, the faster the page
+  can be loaded and become interactive. This holds true both for &lt;script&gt; tags loading
+  external JavaScript files and those with inline code.
+  • There are several ways to download JavaScript in a nonblocking fashion:
+  — Use the defer attribute of the &lt;script&gt; tag (Internet Explorer and Firefox 3.5+
+  only)
+  — Dynamically create &lt;script&gt; elements to download and execute the code
+  — Download the JavaScript code using an XHR object, and then inject the code
+  into the page
+  By using these strategies, you can greatly improve the perceived performance of a web
+  application that requires a large amount of JavaScript code.
+  
+  </pre>
+
+
+  <div class="pre-header">hasOwnProperty() method</div>
+  <pre>
+ var book = {
+ title: "High Performance JavaScript",
+ publisher: "Yahoo! Press"
+};
+
+alert(book.hasOwnProperty("title")); //true
+alert(book.hasOwnProperty("toString")); //false
+
+alert("title" in book); //true
+alert("toString" in book); //true
+
+</pre>
+
+  <div class="pre-header">Prototype</div>
+  <pre>
+  function Book(title, publisher){
+    this.title = title;
+    this.publisher = publisher;
+    }
+
+  Book.prototype.sayTitle = function(){
+   alert(this.title);
+  };
+
+  var book1 = new Book("High Performance JavaScript", "Yahoo! Press");
+  var book2 = new Book("JavaScript: The Good Parts", "Yahoo! Press");
+
+  alert(book1 instanceof Book); //true
+  alert(book1 instanceof Object); //true
+
+  book1.sayTitle(); //"High Performance JavaScript"
+  alert(book1.toString()); //"[object Object]"
+  </pre>
+
+
+  <div class="pre-header">Summary 2</div>
+  <pre>
+Where you store and access data in JavaScript can have a measurable impact on the
+overall performance of your code. There are four places to access data from: literal
+values, variables, array items, and object members. These locations all have different
+performance considerations.
+• Literal values and local variables can be accessed very quickly, whereas array items
+and object members take longer.
+• Local variables are faster to access than out-of-scope variables because they exist
+in the first variable object of the scope chain. The further into the scope chain a
+variable is, the longer it takes to access. Global variables are always the slowest to
+access because they are always last in the scope chain.
+• Avoid the with statement because it augments the execution context scope chain.
+Also, be careful with the catch clause of a try-catch statement because it has the
+same effect.
+• Nested object members incur significant performance impact and should be
+minimized.
+• The deeper into the prototype chain that a property or method exists, the slower
+it is to access.
+• Generally speaking, you can improve the performance of JavaScript code by storing
+frequently used object members, array items, and out-of-scope variables in local
+variables. You can then access the local variables faster than the originals.
+By using these strategies, you can greatly improve the perceived performance of a web
+application that requires a large amount of JavaScript code.
+  </pre>
+
+  <div class="pre-header"> Using CSS selectors</div>
+<pre>
+  var elements = document.querySelectorAll('#menu a');
+
+   The method querySelectorAll() takes a CSS selector string as
+an argument and returns a NodeList—an array-like object containing matching nodes.
+
+ ... same  as :
+  var elements = document.getElementById('menu').getElementsByTagName('a');
+  but more faster...
+
+   For example, if the page has some div elements with a class name of
+“warning” and some with a class of “notice”, to get a list of all of them you can use
+querySelectorAll():
+
+var errs = document.querySelectorAll('div.warning, div.notice');
+
+</pre>
+
+  <div class="pre-header"> Event delegation</div>
+<pre>
+
+
+  ... if JavaScript is on and the user agent
+is capable enough, you want to intercept all clicks, prevent the default behavior (which
+is to follow the link), send an Ajax request to get the content, and update a portion of
+the page without a refresh. To do this using event delegation, you can attach a click
+listener to the UL “menu” element that wraps all links and inspect all clicks to see
+whether they come from a link.
+
+
+ document.getElementById('menu').onclick = function(e) {
+
+ // x-browser target
+ e = e || window.event;
+ var target = e.target || e.srcElement;
+ var pageid, hrefparts;
+
+ // only interesed in hrefs
+ // exit the function on non-link clicks
+
+ if (target.nodeName !== 'A') {
+   return;
+ }
+ // figure out page ID from the link
+
+ hrefparts = target.href.split('/');
+ pageid = hrefparts[hrefparts.length - 1];
+
+ pageid = pageid.replace('.html', '');
+
+ // update the page
+ ajaxRequest('xhr.php?page=' + id, updatePageContents);
+
+ // x-browser prevent default action and cancel bubbling
+ if (typeof e.preventDefault === 'function') {
+  e.preventDefault();
+   e.stopPropagation();
+ } else {
+   e.returnValue = false;
+   e.cancelBubble = true;
+ }
+};
+</pre>
+
+  <div class="pre-header"> Summary</div>
+<pre>
+DOM access and manipulation are an important part of modern web applications. But
+every time you cross the bridge from ECMAScript to DOM-land, it comes at a cost. To
+reduce the performance costs related to DOM scripting, keep the following in mind:
+• Minimize DOM access, and try to work as much as possible in JavaScript.
+• Use local variables to store DOM references you’ll access repeatedly.
+• Be careful when dealing with HTML collections because they represent the live,
+underlying document. Cache the collection length into a variable and use it when
+iterating, and make a copy of the collection into an array for heavy work on
+collections.
+• Use faster APIs when available, such as querySelectorAll() and
+firstElementChild.
+• Be mindful of repaints and reflows; batch style changes, manipulate the DOM tree
+“offline,” and cache and minimize access to layout information.
+• Position absolutely during animations, and use drag and drop proxies.
+• Use event delegation to minimize the number of event handlers.
+
+</pre>
+
+  <div class="pre-header">Loops</div>
+<pre>
+//minimizing property lookups
+for (var i=0, len=items.length; i < len; i++){
+ process(items[i]);
+}
+
+
+//minimizing property lookups and reversing
+for (var i=items.length; i--; ){
+ process(items[i]);
+}
+
+var j = items.length;
+while (j--){
+ process(items[j]]);
+}
+var k = items.length-1;
+do {
+ process(items[k]);
+} while (k--);
+</pre>
+
+
+  <div class="pre-header">Memoize</div>
+<pre>
+function memoize(fundamental, cache){
+   cache = cache || {};
+   var shell = function(arg){
+     if (!cache.hasOwnProperty(arg)){
+       cache[arg] = fundamental(arg);
+     }
+     return cache[arg];
+   };
+   return shell;
+}
+This memoize() function accepts two arguments: a function to memoize and an optional
+cache object. The cache object can be passed in if you’d like to prefill some values.
+Example :
+  //memoize the factorial function
+var memfactorial = memoize(factorial, { "0": 1, "1": 1 });
+//call the new function
+var fact6 = memfactorial(6);
+var fact5 = memfactorial(5);
+var fact4 = memfactorial(4);
+</pre>
+
+  <div class="pre-header">Using timer</div>
+  <pre>
+var todo = items.concat(); //create a clone of the original
+
+setTimeout(function(){
+
+ //get next item in the array and process it
+ process(todo.shift());
+
+ //if there's more items to process, create another timer
+ if(todo.length > 0){
+   setTimeout(arguments.callee, 25);
+ } else {
+  callback(items);
+ }
+}, 25);
+
+    The basic idea of this pattern is to create a clone of the original array and use that as a
+queue of items to process. The first call to setTimeout() creates a timer to process the
+first item in the array. Calling todo.shift() returns the first item and also removes it
+from the array. This value is passed into process(). After processing the item, a check
+is made to determine whether there are more items to process. If there are still items in
+the todo array, there are more items to process and another timer is created. Because
+the next timer needs to run the same code as the original, arguments.callee is passed
+in as the first argument. This value points to the anonymous function in which the code
+is executing. If there are no further items to process, then a callback() function is called.
+
+
+    Because this pattern requires significantly more code that a regular loop, it’s useful to
+encapsulate this functionality. For example:
+
+function processArray(items, process, callback){
+ var todo = items.concat(); //create a clone of the original
+ setTimeout(function(){
+ process(todo.shift());
+ if (todo.length > 0){
+ setTimeout(arguments.callee, 25);
+ } else {
+ callback(items);
+ }
+ }, 25);
+}
+The processArray() function implements the previous pattern in a reusable way and
+accepts three arguments: the array to process, the function to call on each item, and a
+callback function to execute when processing is complete. 
+
+     This function can be used as follows:
+
+var items = [123, 789, 323, 778, 232, 654, 219, 543, 321, 160];
+
+function outputValue(value){
+ console.log(value);
+}
+processArray(items, outputValue, function(){
+ console.log("Done!");
+});
+
+</pre>
+  <!--   end of the html  -->
+    </body>
+    </html>
