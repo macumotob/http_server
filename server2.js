@@ -8,10 +8,9 @@ var http = require("http"),
     wdir = "site",
     wfolder;
 
-//var expr = require("express");
 
 process.argv.forEach(function (val, index, array) {
-  //console.log("argv " + index + ': ' + val);
+ 
   switch(index)  {
     case 2:
       host = process.argv[2];
@@ -45,7 +44,6 @@ function error_handler(response,err) {
   } else {
     response.write('dumpError :: argument is not an object');
   }
-//  response.write(" File : " + filename);
   response.end();
   console.log("...>");
 }
@@ -133,59 +131,6 @@ function send_folder_content(response, folder) {
     }
       
   });
-/*
-  fs.readFile('mobile/data/folders.json', { encoding: 'utf-8' }, function (err, data) {
-     
-      if (err)
-        throw err;
-
-      if (data) {
-        var arr = eval("arr=" + data);
-        var s = "x=[";
-        var item;
-
-        if (folder === "root") {
-          for (var i = 0, max = arr.length; i < max ; i++){
-            item =arr[i];
-            s += (i > 0 ? "," : "") + "{name:'~" + item.name + "',d:1}";
-          }
-          s += "]";
-          response.writeHead(200, { "Content-Type": "text/plain" });
-          response.write(s);
-          response.end();
-         }
-        else {
-          var arr_path = folder.split('/');
-          var xpath = convert_path(arr, folder);
-          if (xpath) {
-            var fs2 = require('fs');
-              var files = fs2.readdirSync(xpath);
-              for (var i in files) {
-                var currentFile = xpath + files[i];
-                var stats = fs2.statSync(currentFile);
-                if (i > 0) s += ",";
-                if (stats.isFile()) {
-                  s += "{name:'" + files[i] +"',d:0}";
-                }
-                else if (stats.isDirectory()) {
-                  s += "{name:'" + files[i] +"/',d:1}"; //traverseFileSystem(currentFile);
-                }
-              }
-          }
-          else {
-            s += "{name:'Error read " + folder +"',d:1}";
-          }
-          s += "]";
-          //console.log(".....=>" + s);
-
-          response.writeHead(200, { "Content-Type": "text/plain" });
-          response.write(s);
-          response.end();
-          }
-        
-       }
-    });
- */ 
 }
 
 function send_file_content(response, filename) {
@@ -198,20 +143,12 @@ function send_file_content(response, filename) {
 function process_command(x,i,req, res) {
   try {
 
-    //var uri = decodeURIComponent(url.parse(request.url).pathname)
-   // x = decodeURIComponent(x);
-  
-    //var x = request.url;
-    //var i = x.indexOf("?");
-
     var cmd = x.substr(i + 1, x.length - i);
     var func = x.substr(1, i - 1);
 
-    //console.log(".....SS.....(" + i + ") " + func + " " + x);
-
     var qs = require("querystring");
     var prms = qs.parse(cmd);
-    console.log(cmd  + '  ' + func);
+  //  console.log(cmd  + '  ' + func);
     if(func === "get.folder"){
       send_folder_content(res,prms.folder);
       return;
@@ -219,7 +156,6 @@ function process_command(x,i,req, res) {
 
     if (func === "get.file") {
       var f = prms.file;
-      //    console.log('func:' + func + " F:" + f);
       console.log(req.headers);
       var range = req.headers['range'];
       if (range) {
@@ -231,8 +167,6 @@ function process_command(x,i,req, res) {
       }
       return;
     }
-
-  //  console.log('func :' + func);
 
     eval(fs.readFileSync(func) + '');
     func = func.substr(func, func.indexOf('.'));
@@ -254,7 +188,6 @@ function send_file(response,filename,is_mobile) {
     '.json':"application/json"
   };
 
- // console.log("file:" + filename);
 
   fs.exists(filename, function (exists) {
     if (!exists) {
@@ -268,7 +201,6 @@ function send_file(response,filename,is_mobile) {
     if (fs.statSync(filename).isDirectory()) {
       filename += (is_mobile ? '/mobile/index.html': '/index.html');
     }
-  //  console.log("file 2:" + filename);
 
     fs.readFile(filename, "binary", function (err, file) {
       if (err) {
@@ -299,10 +231,6 @@ function upload_file(req, res, info) {
   redirect(function (folders) {
     var file = convert_path(folders, filename);
 
-    //console.log("upload file: " + file);
-    //console.log("size: " + info.size + " fsize:" + info.filesize);
-    //console.log("start:" + info.start + " end:" + info.end);
-    //console.log("action:" + info.action);
 
     if (req.method == 'POST') {
 
@@ -314,38 +242,18 @@ function upload_file(req, res, info) {
       }
       var flag = (info.action === "open" ? "w" : "a");
       var stream = fs.createWriteStream(file, { 'flags': flag });
-      // use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
 
       var post_data = "", len = 0;
       req.on('data', function (data) {
         stream.write(data);
-        //console.log('update data :' + data.length);
-       // post_data += data;
         len += data.length;
-        //if (post_data .length > 1e6) {
-        //  post_data  = "";
-        //  res.writeHead(413, { 'Content-Type': 'text/plain' }).end();
-        //  req.connection.destroy();
-        //}
       });
 
       req.on('end', function () {
         stream.end();
-        //console.log('update end. total : ' + len);
-        //   fs.writeFile(file, post_data, 'binary', function (err) {
-        
-        //  if (err) {
-        //    res.writeHead(200, { "Content-Type": "text/plain" });
-        //    res.write("{result:'error', msg:'" + err.toString() + "', offset:-1}");
-        //    res.end();
-        //  }
-        //  else {
             res.writeHead(200, { "Content-Type": "text/plain" });
             res.write("{result:'ok', msg:'" + info.action + "', offset:" + info.end + "}");
             res.end();
-        //  }
-        //  console.log('File saved.')
-        //});
       });
 
     } else {
@@ -362,19 +270,15 @@ http.createServer(function(request, response) {
       , filename = decodeURIComponent(path.join(process.cwd(), uri));
   
     var query= decodeURIComponent(request.url);
- //   console.log(uri);
- //   console.log(query);
     var ua = request.headers['user-agent'];
     var is_mobile = /phone|iphone/i.test(ua);
- //   var x = decodeURIComponent(request.url);
 
     var i = query.indexOf("?");
-   //  console.log("method :" + request.method);
-  //  console.log(query);
     if (i > -1) {
       process_command(query, i, request, response);
       return;
     }
+
     if (query === '/open' || query === '/continue' || query === '/close') {
       console.log('command : ' + query);
       var action = request.headers['baybak-action'];
@@ -419,12 +323,10 @@ function register_server() {
   callback = function(response) {
     var str = '';
 
-    //another chunk of data has been recieved, so append it to `str`
     response.on('data', function (chunk) {
       str += chunk;
     });
 
-    //the whole response has been recieved, so we just print it out here
     response.on('end', function () {
       console.log(str);
       console.log(".........................................");
@@ -434,7 +336,7 @@ function register_server() {
   http.request(options, callback).end();
 }
 
-register_server();
+//register_server();
 
 process.chdir(wdir);
 var os = require("os");
