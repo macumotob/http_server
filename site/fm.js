@@ -141,11 +141,12 @@ function create_image_view(parent, filename) {
   load_async("/img_view.html", function (text) {
     parent.innerHTML = text;
     var img = id("#img-view");
-    var left = 10,
-        w = (screen.width /2 - (left * 4));
+    var left = 2,
+       // w = (screen.availWidth  - (left * 4));
+w = document.body.clientWidth -(left*2);
     parent.style.left = left +"px";
     parent.style.width = w + "px";
-    img.style.width = (w * 0.969) + "px";
+    img.style.width = (w -15) + "px";
     //img.src = filename;
     fm.img_find();
     fm.img_refresh();
@@ -261,6 +262,27 @@ function fm_prevent_events(e) {
     e.returnValue = false;
     e.cancelBubble = true;
   }
+}
+function fm_create_folder() {
+
+  var elem = id("#new-folder-name");
+ // alert(elem.value);
+// return;
+  var folder_name = encodeURI(elem.value);//decodeURIComponent(new_folder_name);
+  load_async_json("/mkdir?folder=" + fm.join_path() + "&name=" + folder_name, function (data) {
+    if (data.result) {
+      fm_refresh();
+    }
+    else {
+      alert(data.name + "\n" + data.msg);
+    }
+    
+  });
+}
+function on_resize() {
+  var w = document.body.clientWidth;
+  var h = document.body.clientHeight;
+  alert(w + ":" + h);
 }
 function get_folder_content(e) {
   e = e || window.event;

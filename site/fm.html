@@ -29,13 +29,20 @@
      // alert(text);
       // document.write(text);
       document.body.innerHTML = text;
-
+      document.body.onreset = function () { on_resize()};
+      document.body.onresize = function () {
+        on_resize();
+      };
      // document.body.onload = function () {
         load_script("fm.js", function () {
           init_document("root");
           load_script("coba_upload.js", function () { });
         });
-    //  };
+      //  };
+        window.addEventListener("orientationchange", function () {
+          // Announce the new orientation number
+          alert(window.orientation);
+        }, false);
     });
   });
 </script>

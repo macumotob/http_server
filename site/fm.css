@@ -54,6 +54,10 @@ padding: 0px 0px 10px 0px;
 height:34px; 
 background-color:white;
 }
+.image-button{
+  width:34px;
+  height:34px;
+}
 #table-images img{
   width:34px;
   height:34px;

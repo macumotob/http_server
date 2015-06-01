@@ -47,7 +47,7 @@ function coba_upload_part(file, blobs, poss, first, dv)
  // var file_name = join_path(true) + file.name;
   
   var info =
-         "name=" + join_path() + file.name
+         "name=" + fm.join_path() + file.name
        + "&type=" + file.type
        + "&size=" + (blob ? blob.size : -1)
        + "&filesize=" + file.size

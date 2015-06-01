@@ -52,7 +52,11 @@ function show_404(req, res, text) {
   res.write(text);
   res.end();
 }
-
+function send_json(res, text) {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.write(text);
+  res.end();
+}
 function convert_path(arr,folder) {
   var arr_path = folder.split('/');
   var xpath;
@@ -140,6 +144,26 @@ function send_file_content(response, filename) {
     send_file(response, file, false);
   });
 }
+
+function fm_create_folder(res, folder, name) {
+  console.log(folder + ' name:' + name);
+  redirect(function (folders) {
+    var xpath = convert_path(folders, folder) + name;
+    try {
+      fs.mkdirSync(xpath, { encoding: 'utf8' });
+      send_json(res, "x={result: true, msg: 'created success', name:'" + xpath + "'}");
+    } catch (e) {
+      console.log(e.toString());
+      send_json(res, "x={result: false, msg: '" + e.toString() + "', name:'" + xpath + "'}");
+      //if (e.code != 'EEXIST') {
+      //  send_json(res, "x={result: false, msg: ' Exists: " + e.massege + "', name:'" + xpath + "'}");
+      //}
+      //else {
+      //  send_json(res, "x={result: false, msg: '" + e.massege + "', name:'" + xpath + "'}");
+      //}
+    }
+  });
+}
 function process_command(x,i,req, res) {
   try {
 
@@ -168,6 +192,10 @@ function process_command(x,i,req, res) {
       return;
     }
 
+    if (func === "mkdir") {
+      fm_create_folder(res, prms.folder, prms.name);
+      return;
+    }
     eval(fs.readFileSync(func) + '');
     func = func.substr(func, func.indexOf('.'));
     var s = func + "(response,prms);";
@@ -272,6 +300,7 @@ http.createServer(function(request, response) {
     var query= decodeURIComponent(request.url);
     var ua = request.headers['user-agent'];
     var is_mobile = /phone|iphone/i.test(ua);
+    console.log(query);
 
     var i = query.indexOf("?");
     if (i > -1) {
