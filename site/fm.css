@@ -14,7 +14,6 @@ font-size:1.2em;
 }
 #top-menu {
   width:100%;
- 
   background-color:red;
 position:relative;
 }
@@ -22,16 +21,32 @@ position:relative;
  background-color:white;
  cursor:pointer;
 }
-#left-menu{
-  left:1%;
-  top:1%;
-  width:98%;
-  height:79%;
-  background-color:green;
-  
-  
-  position:relative;
-  overflow:scroll;
+#left-menu {
+  left: 1%;
+  top: 1%;
+  width: 98%;
+  height: 79%;
+  background-color: green;
+  position: relative;
+  overflow: scroll;
+}
+#viewer {
+width:94%;
+overflow:auto;
+cursor:pointer;
+        }
+#table-in-popup{
+width:100%;
+
+background-color:blue;
+}
+#table-in-popup td {
+padding: 8px;
+color:white;
+background-color:green;
+}
+#table-in-popup tr{
+padding: 0px 0px 10px 0px;
 }
 #table-images{
  height:34px;
