@@ -166,13 +166,26 @@ function fm_create_folder(res, folder, name) {
 }
 function send_file_part(req, res,file) {
 
+  var maxchunk = 1024 * 1024;
+
+  var stats = fs.statSync(file);
+  var total = stats["size"];
+
   var range = req.headers.range;
   var positions = range.replace(/bytes=/, "").split("-");
+
   var start = parseInt(positions[0], 10);
-  var end = partialend ? parseInt(partialend, 10) : total - 1;
+  
+  // var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+  var end = positions[1] ? parseInt(positions[1], 10) : total -1;
   var chunksize = (end - start) + 1;
+  //if (chunksize > maxchunk) {
+  //  chunksize = maxchunk;
+  //  end = start + chunksize - 1;
+  //}
  // var total = movie_mp4.length;
   console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
+  console.log("total: " + total + " " + file);
 
   var options = {
     'flags': 'r'
@@ -195,9 +208,14 @@ function send_file_part(req, res,file) {
   .on('data', function (chunk) {
     //data += chunk;
     res.write(chunk);
-
+  })
+  .on('error', function (err) {
+    console.log("error :" + err);
+    res.end();
   })
   .on('end', function () {
+    res.end();
+    console.log("end...:" + file);
   }).read();
 
 }
@@ -220,7 +238,10 @@ function process_command(x,i,req, res) {
       //console.log(req.headers);
       var range = req.headers['range'];
       if (range) {
-        send_file_part(req, res,f);
+        redirect(function (folders) {
+          var xpath = convert_path(folders, f);
+          send_file_part(req, res, xpath);
+        });
       }
       else {
         send_file_content(res, f);
@@ -239,7 +260,7 @@ function process_command(x,i,req, res) {
   }
   catch (err) {
     console.log("ERROR !!!!!!!");
-    error_handler(response, err);
+    error_handler(res, err);
   }
 }
 
@@ -266,7 +287,7 @@ function send_file(response,filename,is_mobile) {
     if (fs.statSync(filename).isDirectory()) {
       filename += (is_mobile ? '/mobile/index.html': '/index.html');
     }
-    /*
+   
     var headers = {};
     var ext = path.extname(filename);
     var contentType = contentTypesByExtension[ext];
@@ -277,11 +298,11 @@ function send_file(response,filename,is_mobile) {
     }
     response.writeHead(200, headers);
 
-    var stream = fs.createReadStream(filename, "binary");
-    stream.on('data', function (data) { response.write(data); });
-    stream.on('error', function (error) { response.end(); console.log(error); });
-    stream.on('end', function () { response.end(); });
-*/
+    var stream = fs.createReadStream(filename, "binary")
+    .on('data', function (data) { response.write(data); })
+    .on('error', function (error) { response.end(); console.log(error); })
+    .on('end', function () { response.end(); }).read();
+/*
 
     fs.readFile(filename, "binary", function (err, file) {
       if (err) {
@@ -303,7 +324,7 @@ function send_file(response,filename,is_mobile) {
       response.writeHead(200, headers);
       response.write(file, "binary");
       response.end();
-    });
+    });*/
   });
 }
 function upload_file(req, res, info) {
