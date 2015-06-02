@@ -1,50 +1,16 @@
 ﻿
-<div style="
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 0px;
-    width: 90%;
-    height: 80%;
-    background-color: #E6F5E5;
-    border:2px solid #61EE57;
-    ">
-    <div style="width:100%;height:21px;background-color:#61EE57;color:green;text-align:center;">Upload files to server</div>
+<div class="upload-form">
+    <div class="upload-form-header">Upload files to server</div>
 
     <input type="file" 
            onchange="coba_upload_show_info();"
            id="control_upload_files" multiple style="visibility:hidden;position:absolute;top:-50px;left:-50px" />
 
-    <table style="padding:0;margin:0;width:100%">
-        <colgroup>
-            <col width="50%" />
-            <col width="25%" />
-            <col width="25%" />
-        </colgroup>
-        <tr style="height:21px;"> </tr>
+    <table class="upload-form-control">
         <tr>
-            <td></td>
-            <td style="
-                background-color:#61ee57;
-                color:black;
-                text-align:center;
-                cursor:pointer;
-                border-radius:5px;
-                "
-                onclick="control_upload_files.click();"
-                >
-                Select files to upload
-            </td>
-            <td style="
-                background-color:#61ee57;
-                color:black;
-                text-align:center;
-                cursor:pointer;
-                border-radius:5px;
-                "
-                onclick="coba_upload_files();"
-                >
-                Upload
-            </td>
+            <td class="fm-button" onclick="control_upload_files.click();">Select files to upload</td>
+            <td class="fm-button" onclick="coba_upload_files();">Upload</td>
+          <td class="fm-button" onclick="fm_refresh();">Cancel</td>
         </tr>
     </table>
 

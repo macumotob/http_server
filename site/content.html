@@ -2,13 +2,22 @@
   <div id="top-menu">
     <table id="table-images">
       <tr>
+        <td>
+
+          <span aria-hidden="true" data-icon="&#x21dd;"></span>
+          <span aria-hidden="true" data-icon="&#x2100;"></span>
+
+        </td>
+
         <td onclick="init_document('root');"><img src="img/go_home.png" /></td>
         <td onclick="init_document('..');"><img src="img/go_back.png" /></td>
         <td onclick="fm_refresh();"><img src="img/refresh.png" /></td>
         <td onclick="make_popup();" id="breadcrumb"><img src="img/menu.png" /></td>
 
         <td onclick="create_upload_form();"><img src="img/upload.png" /></td>
-        <td onclick="show_create_folder()"><img src="img/create_folder.png" /></td>
+        <td onclick="create_folder_form()"><img src="img/create_folder.png" /></td>
+
+
       </tr>
     </table>
     <table width="100%">

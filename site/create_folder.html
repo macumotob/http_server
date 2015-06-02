@@ -1,15 +1,23 @@
-﻿
-<table id="table-cre-folder" width="100%">
-<tr>
-<td>Current folder:</td>
-<td id="folder-location"></td>
-</tr>
-<tr>
-<td>New Folder Name</td>
-<td><input id="new-folder-name" type="text"/></td>
-</tr>
-<tr>
-<td onclick="fm_refresh();">Cancel</td>
-<td onclick="fm_create_folder();">Create</td>
-</tr>
-</table>
+﻿<div class="create-folder-div">
+  <table class="create-folder-table">
+    <tr>
+      <td class="create-folder-label">Current folder:</td>
+    </tr>
+    <tr>
+      <td id="folder-location"></td>
+    </tr>
+    <tr>
+      <td class="create-folder-label">New Folder Name:</td>
+    </tr>
+    <tr>
+      <td><input id="new-folder-name" type="text" value=""/></td>
+    </tr>
+  </table>
+
+  <table class="create-folder-table">
+    <tr>
+      <td class="fm-button" onclick="fm_refresh();">Cancel</tdcclass>
+      <td class="fm-button" onclick="fm_create_folder();">Create</td>
+    </tr>
+  </table>
+</div>

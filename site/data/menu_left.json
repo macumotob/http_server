@@ -1,11 +1,21 @@
 ﻿[
-  { name: "TODO", url: "data/todo.txt" },
-  { name: "File Manager", url:"fm.html"},
-  { name: "node.js site", url: "https://nodejs.org/" },
-  { name: "zakas", url: "books/nicholas c. zakas - high performance javascript 2010.pdf" },
-  { name: "test pdf object", url: "pdftest.html" },
-  { name: "javascript conspect", url: "javascript.html" },
-  { name: "почта", url: "https://mail.yandex.com/lite/inbox#folder/2440001130004914442" },
+  { "name": "File Manager", url: "fm.html" },
+  { "name": "node.js site", url: "https://nodejs.org/" },
+  { "name": "zakas", url: "books/nicholas c. zakas - high performance javascript 2010.pdf" },
+  { "name": "test pdf object", url: "pdftest.html" },
+  { "name": "javascript conspect", url: "javascript.html" },
+  {
+    "name": "WW",
+    url: "",
+    submenu: [
+      { "name": "TODO"  , "url": "data/todo.txt" },
+      { "name": "почта" , "url": "https://mail.yandex.com/lite/inbox#folder/2440001130004914442" },
+      { "name": "GitHub", "url": "https://github.com/macumotob" },
+      { "name": "my.kyivstar.ua", "url": "https://my.kyivstar.ua/tbmb/disclaimer/show.do" },
+      { "name": "my.kyivstar help", "url": "https://my.kyivstar.ua/tbmb/help_inside/sendQuestion/show.do"}
+    ]                     
+  },
+  
   {
     name: "Книги",
     url: "",

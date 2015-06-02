@@ -139,6 +139,7 @@ function coba_upload_files()
   try{
     if (COBA_UPLOAD_FILES.length == 0)
     {
+      fm_show_error("select files to upload!");
       return;
     }
     for (var i = 0; i < COBA_UPLOAD_FILES.length; i++) {

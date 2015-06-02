@@ -5,7 +5,16 @@ var fm = {
   images: [],
   img_index : 0,
   image : null,
-
+  state: {
+    current: 0,
+    upload: 1,
+    create_folder: 2,
+    navigator:3
+  },
+  errors :{
+    create_folder: "specify the folder in which you want to create a subfolder",
+    upload_select_folder : "specify the folder to which you want to upload files"
+  },
   set_folder: function (folder) {
     if (folder !== "root") {
       if (folder === "..") {
@@ -74,6 +83,27 @@ var fm = {
   var path = "get.file?file=" + fm.join_path() + this.images[this.img_index];
   this.image.src = path;
   id("#img-info").innerHTML = " " + (this.img_index+1) + " / " + this.images.length;
+}
+, refresh_current: function () {
+
+  switch (this.state.current) {
+    case this.state.upload:
+      if (this.stack.length === 0) {
+        fm_refresh();
+      }
+      else {
+        create_upload_form();
+      }
+      break;
+    case this.state.create_folder:
+      create_folder_form();
+      break;
+    case this.state.navigator:
+      fm_refresh();
+      break;
+    default:
+      break;
+  }
 }
 };
 
@@ -167,18 +197,18 @@ function create_vidio_view(parent, filename) {
 }
 function create_upload_form() {
 
+  fm.state.current = fm.state.upload;
 
   var elem = id("#left-menu");
   elem.innerHTML = "";
 
   if (fm.stack.length == 0) {
-    elem.style.color = "white";
-    elem.innerHTML = "select folder ";
+    fm_show_error(fm.errors.upload_select_folder);
   }
   else {
     load_async("upload_form.html", function (data) {
       elem.innerHTML = data;
-      elem.style.color = "white";
+   //   elem.style.color = "white";
 
       var div = id("#target-folder");
       //div.innerHTML = join_path(true);
@@ -186,14 +216,13 @@ function create_upload_form() {
   }
 
 }
-function show_create_folder() {
+function create_folder_form() {
 
   var elem = id("#left-menu");
   elem.innerHTML = "";
 
   if (fm.stack.length == 0) {
-    elem.style.color = "white";
-    elem.innerHTML = "select folder ";
+    fm_show_error(fm.errors.create_folder);
   }
   else {
     load_async("create_folder.html", function (data) {
@@ -210,7 +239,6 @@ function get_file(file) {
   var elem = id("#left-menu");
   elem.innerHTML = "";
   var ext = get_file_ext(file);
-
   var command = "get.file?file=" + fm.join_path() + file;
   var x = decodeURI(command);
   // alert(x);
@@ -239,7 +267,15 @@ function get_file(file) {
   }
   
 }
-
+function fm_downlod_file(file){
+  var link = document.createElement("a");
+  link.download = file;
+  link.href = fm.join_path() +decodeURIComponent(file);
+  link.target = "_blank";
+//  alert(link.href);
+  link.click();
+  fm_refresh();
+}
 function fm_recreate_stack(max) {
   var new_stack = [];
   for (var i = 0; i < max; i++) {
@@ -250,7 +286,7 @@ function fm_recreate_stack(max) {
   return folder;
 }
 function fm_refresh() {
-
+  fm.state.current = fm.state.navigator;
   var folder =  (fm.stack.length > 0) ?fm_recreate_stack(fm.stack.length - 1) : "root";
   init_document(folder);
 }
@@ -263,12 +299,32 @@ function fm_prevent_events(e) {
     e.cancelBubble = true;
   }
 }
+function fm_set_main_content(html) {
+  var elem = id("#left-menu");
+  elem.innerHTML = html;
+}
+function fm_show_error(text) {
+  load_async("/error.html", function (data) {
+    fm_set_main_content(data);
+    id("#error-text").innerHTML = text;
+  });
+}
 function fm_create_folder() {
 
   var elem = id("#new-folder-name");
- // alert(elem.value);
+  fm.state.current = fm.state.create_folder;
+
+  if (elem.value.length < 1) {
+    fm_show_error("folder name is empty!");
+    //load_async("/error.html", function (data) {
+    //  fm_set_main_content(data);//
+    //  id("#error-text").innerHTML = "folder name is empty!";
+    //});
+    return;
+  }
+
 // return;
-  var folder_name = encodeURI(elem.value);//decodeURIComponent(new_folder_name);
+  var folder_name = encodeURI(elem.value);
   load_async_json("/mkdir?folder=" + fm.join_path() + "&name=" + folder_name, function (data) {
     if (data.result) {
       fm_refresh();
@@ -282,7 +338,7 @@ function fm_create_folder() {
 function on_resize() {
   var w = document.body.clientWidth;
   var h = document.body.clientHeight;
-  alert(w + ":" + h);
+ // alert(w + ":" + h);
 }
 function get_folder_content(e) {
   e = e || window.event;
@@ -360,6 +416,7 @@ function make_breadcrumbs() {
 function init_document(folder) {
 
   try {
+    fm.state.current = fm.state.navigator;
     folder = fm.set_folder(folder);
     make_breadcrumbs();
 
@@ -386,13 +443,25 @@ function init_document(folder) {
         tr = document.createElement('tr');
         tb.appendChild(tr);
         td = document.createElement('td');
-        td.setAttribute("command", encodeURI(item.name));
+        td.setAttribute("command",encodeURI(item.name));
         td.setAttribute("isdir", item.d);
-        if (item.d === 0) {
-          td.style.color = 'yellow';
-        }
         td.appendChild(document.createTextNode(item.name));
         tr.appendChild(td);
+        if (item.d === 0) {
+          td.style.color = 'yellow';
+
+          td = document.createElement('td');
+          td.className = 'fm-button';
+          td.style.width = "10%";
+          td.setAttribute("command", encodeURI(item.name));
+          td.setAttribute("download", "1");
+
+          td.appendChild(document.createTextNode('download'));
+          tr.appendChild(td);
+        }
+        else {
+          td.setAttribute('colspan', 2);
+        }
       }
       
       tb.onclick = function (e) {
@@ -409,7 +478,12 @@ function init_document(folder) {
           init_document(target.getAttribute("command"));
         }
         else {
-          get_file(target.getAttribute("command"));
+          if(target.getAttribute("download")){
+            fm_downlod_file(target.getAttribute("command"));
+          }
+          else{
+            get_file(target.getAttribute("command"));
+          }
         }
         fm_prevent_events(e);
       };

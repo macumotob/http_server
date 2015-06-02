@@ -4,6 +4,98 @@ body {
 background-color:blue;
 font-size:1.2em;
 }
+
+input{
+width:100%;
+}
+/*
+        fm button
+*/
+.fm-button{
+background-color:green;
+color:white;
+text-align:center;
+width:33%;
+cursor:pointer;
+border-radius:4px;
+}
+/*
+         form error
+*/
+.fm-error-form{
+width:99%;
+border:1px lightgray solid;
+padding-top:30px;
+padding-bottom:30px;
+border-radius:5px;
+}
+.fm-error-panel{
+left:20%;
+top:10%;
+width:60%;
+position:relative;
+}
+.fm-error-panel td{
+margin-bottom:30px;
+}
+#error-text{
+font-size:x-large;
+color:red;
+text-align:center;
+}
+/*  
+       form create folder
+*/
+.create-folder-div{
+width:99%;
+border:1px lightgray solid;
+/*background-color:red;*/
+}
+.create-folder-table{
+left:20%;
+top:10%;
+width:60%;
+/*border:1px blue solid;*/
+background-color:white;
+color:black;
+position:relative;
+}
+.create-folder-label{
+ color:#808080;
+font-size:small;
+}/*
+     form upload
+ */
+.upload-form{
+
+}
+.upload-form-header{
+color:lightgray;
+text-align:center;
+width:100%;
+font-size:small;
+}
+.upload-form-control{
+left:20%;
+top:10%;
+width:60%;
+/*border:1px blue solid;*/
+background-color:white;
+color:black;
+position:relative;
+}
+/*
+.upload-form-button{
+  background-color:green;
+color:white;
+text-align:center;
+width:33%;
+cursor:pointer;
+border-radius:4px;
+}
+*/
+/*--------------*/
+
 #main-div{
   left:0%;
   top:0%;
@@ -26,7 +118,7 @@ position:relative;
   top: 1%;
   width: 98%;
   height: 79%;
-  background-color: green;
+  /*background-color: green;*/
   position: relative;
   overflow: scroll;
 }
@@ -88,4 +180,9 @@ cursor:pointer;
   color:white;
   margin:18px;
   padding:8px;
+}
+/*-----------------*/
+[data-icon]:before {
+	font-family: 'Pictos Custom';
+	content: attr(data-icon);
 }

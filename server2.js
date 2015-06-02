@@ -164,6 +164,43 @@ function fm_create_folder(res, folder, name) {
     }
   });
 }
+function send_file_part(req, res,file) {
+
+  var range = req.headers.range;
+  var positions = range.replace(/bytes=/, "").split("-");
+  var start = parseInt(positions[0], 10);
+  var end = partialend ? parseInt(partialend, 10) : total - 1;
+  var chunksize = (end - start) + 1;
+ // var total = movie_mp4.length;
+  console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
+
+  var options = {
+    'flags': 'r'
+  , 'encoding': null
+  , 'mode': 0666
+  , 'bufferSize': 64 * 1024
+  , 'start': start
+  , 'end' :end
+  };
+
+  res.writeHead(206, {
+    "Content-Range": "bytes " + start + "-" + end + "/" + total,
+    "Accept-Ranges": "bytes",
+    "Content-Length": chunksize,
+    "Content-Type": "video/mp4"
+  });
+
+  //var data = '';
+  var stream = fs.createReadStream(file, options)
+  .on('data', function (chunk) {
+    //data += chunk;
+    res.write(chunk);
+
+  })
+  .on('end', function () {
+  }).read();
+
+}
 function process_command(x,i,req, res) {
   try {
 
@@ -180,11 +217,10 @@ function process_command(x,i,req, res) {
 
     if (func === "get.file") {
       var f = prms.file;
-      console.log(req.headers);
+      //console.log(req.headers);
       var range = req.headers['range'];
       if (range) {
-        console.log('range unsopported....');
-        show_404(req, res, "range unsupported");
+        send_file_part(req, res,f);
       }
       else {
         send_file_content(res, f);
@@ -223,18 +259,36 @@ function send_file(response,filename,is_mobile) {
       response.write("404 Not Found\n");
       response.write(" File : " + filename);
       response.end();
+      console.log('error 404');
       return;
     }
 
     if (fs.statSync(filename).isDirectory()) {
       filename += (is_mobile ? '/mobile/index.html': '/index.html');
     }
+    /*
+    var headers = {};
+    var ext = path.extname(filename);
+    var contentType = contentTypesByExtension[ext];
+    if (contentType) {
+      headers["Content-Type"] = contentType;
+    }
+    else {
+    }
+    response.writeHead(200, headers);
+
+    var stream = fs.createReadStream(filename, "binary");
+    stream.on('data', function (data) { response.write(data); });
+    stream.on('error', function (error) { response.end(); console.log(error); });
+    stream.on('end', function () { response.end(); });
+*/
 
     fs.readFile(filename, "binary", function (err, file) {
       if (err) {
         response.writeHead(500, { "Content-Type": "text/plain" });
         response.write(err + "\n");
         response.end();
+        console.log('error 500');
         return;
       }
 
@@ -300,7 +354,25 @@ http.createServer(function(request, response) {
     var query= decodeURIComponent(request.url);
     var ua = request.headers['user-agent'];
     var is_mobile = /phone|iphone/i.test(ua);
-    console.log(query);
+
+    if (query.indexOf('/~') === 0) {
+      redirect(function (folders) {
+        var xpath = convert_path(folders, query.substr(1));
+        console.log(request.headers);
+        var range = request.headers['range'];
+        if (range) {
+          console.log('send part file :[' + range);
+          send_file_part(request, response, xpath);
+        }
+        else {
+          console.log('send file :' + xpath);
+          send_file(response, xpath, is_mobile);
+        }
+
+        return;
+      });
+    }
+   //  console.log('query:' +query);
 
     var i = query.indexOf("?");
     if (i > -1) {
@@ -330,6 +402,8 @@ http.createServer(function(request, response) {
       console.log(request.url);
     }
     else {
+   //   var range = request.headers['range'];
+   //   console.log('send file :[' + range);
       send_file(response, filename, is_mobile);
     }
   }

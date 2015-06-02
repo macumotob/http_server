@@ -4,6 +4,10 @@ body {
 background-color:black;
 font-size:1.2em;
 }
+input{
+width:100%;
+}
+/*----------*/
 #main-div{
   left:0%;
   top:0%;
@@ -26,7 +30,7 @@ text-align:center;
   width:98%;
   height:79%;
 
-  background-color:green;
+  background-color:black;
   
   position:relative;
   overflow:scroll;
@@ -58,6 +62,22 @@ background-color:white;
 .image-button{
   width:34px;
   height:34px;
+}
+/*  
+       form create folder
+*/
+.create-folder-table{
+width:100%;
+background-color:black;
+}
+.create-folder-button{
+  background-color:lightgreen;
+color:black;
+text-align:center;
+width:50%;
+}
+.create-folder-label{
+ color:#808080;
 }
 /*--------------*/
 #table-images{
@@ -95,4 +115,9 @@ cursor:pointer;
   color:white;
   margin:18px;
   padding:8px;
+}
+
+[data-icon]:before {
+	font-family: 'Pictos Custom';
+	content: attr(data-icon);
 }
