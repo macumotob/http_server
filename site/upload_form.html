@@ -8,31 +8,14 @@
 
     <table class="upload-form-control">
         <tr>
-            <td class="fm-button" onclick="control_upload_files.click();">Select files to upload</td>
-            <td class="fm-button" onclick="coba_upload_files();">Upload</td>
-          <td class="fm-button" onclick="fm_refresh();">Cancel</td>
+          <td class="upload-form-button" onclick="control_upload_files.click();">Select files to upload</td>
+          <td class="upload-form-button" onclick="coba_upload_files();">Upload</td>
+          <td class="upload-form-button" onclick="fm_refresh();">Cancel</td>
         </tr>
     </table>
 
-    <div 
-         style="
-            margin-left: auto;
-            margin-right: auto;
-            margin-top: 10px;
-            width: 90%;
-            height: 80%;
-            background-color: #E6F5E5;
-            border:2px solid #61EE57;
-            overflow:auto;
-color:black;
-            ">
-
+    <div class="upload-form-content">
         <table id="control_progress" style="width:100%;">
-            <colgroup>
-                <col width="70%" />
-                <col width="20%" />
-                <col width="10%" />
-            </colgroup>
         </table>
     </div>
 

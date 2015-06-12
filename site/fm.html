@@ -1,79 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>maxbuk fm</title>
- <!--link 	rel="stylesheet" type="text/css" href="fm.css"-->
-  <script type="text/javascript" src="loader.js"></script>
-</head>
- <body>
-<script type="text/javascript">
-  var link = "fm.css";
- 
- if (navigator.userAgent.indexOf("Windows Phone") !== -1) {
-   link = "wp.css";
-   //<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-   //<meta name="HandheldFriendly" content="true">
-  
-   var meta = document.createElement('meta');
-   meta.name = "viewport";
-   meta.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
-   document.getElementsByTagName('head')[0].appendChild(meta);
 
-   meta.name = "HandheldFriendly";
-   meta.content = "true";
-   document.getElementsByTagName('head')[0].appendChild(meta);
- }
-// alert(link + "\n" + navigator.userAgent);
-  load_style(link, function () {
-    load_async("content.html", function (text) {
-     // alert(text);
-      // document.write(text);
-      document.body.innerHTML = text;
-      document.body.onreset = function () { on_resize()};
-      document.body.onresize = function () {
-        on_resize();
-      };
-     // document.body.onload = function () {
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+
+  <script type="text/javascript" src="loader.js"></script>
+
+<script type="text/javascript">
+   
+
+</script>
+</head>
+
+<body>
+  <script type="text/javascript">
+//<![CDATA[
+    var link = "fm.css";
+    
+
+    function fm_append_meta(name, content) {
+      var meta = document.createElement('meta');
+      meta.name = name;
+      meta.content = content;
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
+    function fm_is_windows_phone() {
+      return (navigator.userAgent.indexOf("Windows Phone") !== -1);
+    }
+    if (fm_is_windows_phone()) {
+      link = "wp.css";
+     fm_append_meta("viewport", "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no");
+    //  fm_append_meta("HandheldFriendly","true");
+    }
+
+  //  alert(link + "\n" + navigator.userAgent);
+
+    load_style(link, function () {
+      load_async("content.html", function (text) {
+        document.body.innerHTML = text;
         load_script("fm.js", function () {
           init_document("root");
           load_script("coba_upload.js", function () { });
         });
-      //  };
+        //  };
         window.addEventListener("orientationchange", function () {
-          // Announce the new orientation number
           //alert(window.orientation);
         }, false);
+
+      });
     });
-  });
-</script>
+    //------------------------------------------
 
-<!--
-   <div id="main-div">
+    //(function () {
+    //  if ("-ms-user-select" in document.documentElement.style && navigator.userAgent.match(/IEMobile\/10\.0/)) {
+    //    var msViewportStyle = document.createElement("style");
+    //    msViewportStyle.appendChild(
+    //      document.createTextNode("@-ms-viewport{width:auto!important}")
+    //    );
+    //    document.getElementsByTagName("head")[0].appendChild(msViewportStyle);
+    //  }
+    //})();
+//]]>
 
-     <div id="top-menu">
-      <table id="table-images" >
-         <tr>
-          <td onclick="init_document('root');"><img src="img/go_home.png"/></td>
-          <td onclick="init_document('..');"><img src="img/go_back.png" /></td>
+  </script>
 
-          <td onclick="create_upload_form();"><img src="img/upload.png" /></td>
-          <td onclick="show_create_folder()"><img src="img/create_folder.png" /></td>
-          <td onclick="make_popup();" id="breadcrumb"><img src="img/menu.png" /></td>
-        </tr>
-</table>
-<table width="100%">
- <tr><td id="td-path" style="font-size:0.5em"></td></tr>
-</table>
-    </div>
-     <div id="left-menu"></div>
-  </div>
 
-   <script type="text/javascript">
-     load_script("fm.js", function () {
-       init_document("root");
-       load_script("coba_upload.js", function () {});
-     });
-   </script>
--->
 </body>
 </html>

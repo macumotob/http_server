@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>images test</title>
+<script type="text/javascript" src="loader.js"></script>
+</head>
+<body style="background-color:black;padding:0;margin:0;" onresize="draw_images();">
+
+<script type="text/javascript">
+  var urls, count;
+  var images = [];
+
+  var job = {
+    loaded: false,
+    margin: 20,
+    scales: null,
+
+    resize: function () {
+      var line_width = 0,
+          h = 200,
+          left = this.margin,
+          top = this.margin,
+          screen_width = (get_screen_width() - this.margin),
+          line_index = 0;
+
+
+      this.scales = [];
+      for (var i = 0 ; i < count - 1 ; i++) {
+
+        var item = images[i];
+        var w = h * item.koef;
+
+        item.left = left;
+        item.h = h;
+        item.w = w;
+        item.line_index = line_index;
+
+        left += w + this.margin;
+
+        if (left >= screen_width) {
+          this.scales.push(screen_width / left);
+          left = this.margin;
+          line_index++;
+        }
+        if (item.append) {
+          document.body.appendChild(item.img);
+          item.append = false;
+        }
+      }
+      this.scales.push(screen_width / left);
+    }
+  };
+
+  function get_screen_width() {
+    return document.body.clientWidth;
+  }
+
+
+  var img_under_mouse = null;
+
+  function draw_text(elem,index) {
+
+    var picture = elem.img;
+    var c = id("#canvas");
+
+    var left = picture.style.left,
+        top = picture.style.top,
+        width = picture.style.width,
+        height = picture.style.height;
+
+    var w = parseInt(width),
+        h = parseInt(height);
+
+    var s = "position:absolute;left:" + left + ";top:" + top + ";display:block;";
+    c.setAttribute("style", s);
+    c.width = w;
+    c.height =h;
+    var ctx = c.getContext("2d");
+  
+    ctx.globalAlpha = 1;
+
+    ctx.drawImage(picture, 0, 0, w, h);
+
+
+    ctx.globalAlpha = 0.6;
+
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(10, h-24, w - 20, 20);
+    ctx.globalAlpha =1;
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "12px Arial";
+    ctx.fillText("size " + w + "x" + h + " i:" + index,  14,  h - 12);
+  }
+  function draw_images() {
+
+    job.resize();
+    var item = images[0];
+
+    var prev_index = item.line_index;
+    var prev_top;
+    var scale = job.scales[item.line_index];
+   var h = parseInt(item.h * scale);
+   var top = parseInt(job.margin * scale);
+
+    for (var i = 0 ; i < count - 1 ; i++) {
+
+      item = images[i];
+
+
+      if (prev_index != item.line_index) {
+        top += (h + job.margin * scale);
+
+        scale = job.scales[item.line_index];
+        h = parseInt(item.h * scale);
+        prev_index = item.line_index;
+      }
+
+
+      var s = "position:absolute;left:" + parseInt(item.left * scale)
+            + "px;top:" + parseInt(top)
+            + "px;width:" + parseInt(item.w * scale)
+            + "px;height:" + parseInt(item.h * scale)
+            + "px;";
+      ;
+      item.img.setAttribute("style", s);
+    }
+
+  }
+  function load_one_img(index) {
+
+    if (job.loaded) return;
+
+    var img = document.createElement('img');
+    img.src = urls[index];
+    img.id = "i" + index;
+    if (index < count-1) {
+      img.onload = function () {
+
+        images.push({
+          img: img,
+          width: this.width,
+          height: this.height,
+          koef: this.width / this.height,
+          left: 0,
+          top: 0,
+          w: 0,
+          h: 0,
+          line_index: -1,
+          append: true
+        });
+        load_one_img(index +1);
+      };
+    }
+    else{
+      job.loaded = true;
+      draw_images();
+    }
+   // document.body.appendChild(img);
+  }
+
+
+
+  window.onmousemove = function (e) {
+    e = e || window.event;
+    var target = e.target || e.srcElement;
+
+    if (target.nodeName !== 'IMG') {
+      return;
+    }
+
+    if (img_under_mouse == target) {
+      return;
+    }
+    if (img_under_mouse != null) {
+      img_under_mouse.style.display = "block";
+    }
+    img_under_mouse = target;
+    img_under_mouse.style.display = "none";
+    var index = parseInt(img_under_mouse.id.substr(1));
+    draw_text(images[index],index);
+  };
+
+  load_async("/test/test.txt", function (data) {
+    
+
+    urls = data.split('\n');
+    count = urls.length;
+    load_one_img(0);
+
+  });
+
+</script>
+<canvas id="canvas" style="display:none;position:absolute;" width="10px" height="10px"></canvas>
+</body>
+</html>

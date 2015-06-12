@@ -1,6 +1,8 @@
 ﻿[
-  { name: "Фильмы" , path: "E:/Films/"},
-  { name: "Книги", path: "E:/Books/" },
-  { name: "Загрузки", path: "E:/Downloads/" },
-  { name: "Иван", path: "E:/Ivan/" }
+  { "name": "Users"   , "path" : "C:/Users/"},
+  { "name": "Фильмы"  , "path": "E:/Films/" },
+  { "name": "Книги"   , "path": "E:/Books/" },
+  { "name": "Загрузки", "path": "E:/Downloads/" },
+  { "name": "Иван"    , "path": "E:/Ivan/" },
+  { "name": "Skype"   , "path": "C:/Users/vasyl/AppData/Roaming/Skype/" }
 ]

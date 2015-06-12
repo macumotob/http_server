@@ -2,12 +2,42 @@
 <html>
 <head>
   <title>node.js server test</title>
- <link 	rel="stylesheet" type="text/css" href="index.css">
+ <!--link 	rel="stylesheet" type="text/css" href="index.css">-->
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="loader.js"></script>
  
 </head>
  <body onload="init_document();">
-   <div id="main-div" >
+
+<div class="container" >
+  <div class="jumbotron">
+    <h1>My First Bootstrap Page</h1>
+    <p>Resize this responsive page to see the effect!</p>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4">
+      <h3>Books</h3>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+    </div>
+    <div class="col-sm-4">
+      <h3>Column 2</h3>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+    </div>
+    <div class="col-sm-4">
+      <h3>Column 3</h3>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+    </div>
+  </div>
+
+</div>
+
+   <div id="main-div" class="container-fluid">
     <div id="menu-list"></div>
     <div id="d2">
     </div>

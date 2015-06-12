@@ -1,16 +1,17 @@
 ﻿
-<div id="comtainer">
-<table style="width:100%;background-color:white;cursor:pointer">
-<tr>
-  <td onclick="fm.img_show_first();"><img class="image-button" src="img/go_first.png" /></td>
-  <td onclick="fm.img_show_prev();"><img class="image-button" src="img/go_prev.png" /></td>
-
-  <td id="img-info"></td>
-
-  <td onclick="fm.img_show_next();"><img class="image-button" src="img/go_next.png" /></td>
-  <td onclick="fm.img_show_last();"><img class="image-button" src="img/go_last.png" /></td>
-  
-</tr>
-</table>
-<img id="img-view" src=""/>
+<div class="row">
+  <div class="col-xs-2 btn btn-success"  data-method="img.first">|&lt;</div>
+  <div class="col-xs-2 btn btn-success" data-method="img.prev">&lt;</div>
+  <div class="col-xs-2 text-center" id="img-index">0</div>
+  <div class="col-xs-2 text-center" id="img-count">0</div>
+  <div class="col-xs-2 btn btn-success" data-method="img.next">&gt;</div>
+  <div class="col-xs-2 btn btn-success" data-method="img.last">&gt;|</div>
 </div>
+<div class="row">
+ <div class="col-xs-1" data-method="img.prev"></div>
+ <div class="col-xs-8" data-method="img.next">
+   <img id="img-view" class="img-responsive" data-method="img.next" src="" />
+</div>
+<div class="col-xs-1" data-method="img.next"></div>
+</div>
+

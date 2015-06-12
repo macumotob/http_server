@@ -71,7 +71,7 @@ function init_document() {
 }
 
 //
-createCanvas("d2", "canvas2", 500, 400);
+//createCanvas("d2", "canvas2", 500, 400);
 
 load_async_json("data/menu_left.json", function (data) {
   var ul = id("#menu-list");

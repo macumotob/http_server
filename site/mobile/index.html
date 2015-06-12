@@ -4,19 +4,49 @@
   <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="HandheldFriendly" content="true">
-  <link rel="stylesheet" type="text/css" href="mobile/mobile.css">
-  <script type="text/javascript" src="../loader.js"></script>
+<!--
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <script src="https//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+-->
+  <link rel="stylesheet" href="bootstrap.min.css" />
+  <script type="text/javascript" src="loader.js"></script>
+
+<script type="text/javascript">
+  function fm_can_goback() {
+    return  (fm.can_goback() ? "true" : "false");
+  }
+  load_script("generator.js", function () {
+    generator.load(function () {
+          load_script("fm.js", function () {
+            init_document("root");
+            load_script("coba_upload.js", function () { });
+          });
+    })
+  });
+
+</script>
 </head>
-<body>
-   <h1>MOBILE VERSION</h1> 
-  <div id="main-div">
-    <div id="left-menu"></div>
+
+<body onclick="fm_on_click();" onselectstart="return false;">
+  <div class="container">
+<table class="table">
+<tr>
+  <td>maxbuk.com</td>
+  <td onclick="init_document('root');">Home</td>
+  <td onclick="fm_refresh();">Refresh</td>
+</tr>
+<tr>
+  <td class="text-primary" onclick="init_document('..');"><b>&lt;</b></td>
+  <td class="text-primary" onclick="make_popup();" id="breadcrumb">Path</td>
+  <td class="text-primary" onclick="create_upload_form();">Upload</td>
+  <td class="text-primary" onclick="create_folder_form()">Create</td>
+</tr>
+</table>
+
+    <div id="td-path" class="container"></div>
+    <div id="fm-main-content" class="container"></div>
   </div>
-
-  <script type="text/javascript">
-  load_script("fm.js", function () { init_document("root"); });
-  </script>
-
-
 </body>
 </html>

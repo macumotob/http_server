@@ -1,28 +1,28 @@
-﻿<div id="main-div">
-  <div id="top-menu">
-    <table id="table-images">
-      <tr>
-        <td>
+﻿<div class="fm-top-content">
+<table>
+<tr><td >
+  <table id="top-menu">
+    <tr>
+      <td onclick="init_document('root');">Home</td>
+      <td onclick="init_document('..');">Back</td>
+      <td onclick="fm_refresh();">Refresh</td>
+      <td onclick="make_popup();" id="breadcrumb">Path</td>
 
-          <span aria-hidden="true" data-icon="&#x21dd;"></span>
-          <span aria-hidden="true" data-icon="&#x2100;"></span>
-
-        </td>
-
-        <td onclick="init_document('root');"><img src="img/go_home.png" /></td>
-        <td onclick="init_document('..');"><img src="img/go_back.png" /></td>
-        <td onclick="fm_refresh();"><img src="img/refresh.png" /></td>
-        <td onclick="make_popup();" id="breadcrumb"><img src="img/menu.png" /></td>
-
-        <td onclick="create_upload_form();"><img src="img/upload.png" /></td>
-        <td onclick="create_folder_form()"><img src="img/create_folder.png" /></td>
+      <td onclick="create_upload_form();">Upload</td>
+      <td onclick="create_folder_form()">Folder</td>
 
 
-      </tr>
-    </table>
-    <table width="100%">
-      <tr><td id="td-path" style="font-size:0.5em"></td></tr>
-    </table>
-  </div>
-  <div id="left-menu"></div>
+    </tr>
+  </table>
+</td></tr>
+  <tr><td id="td-path"></td></tr>
+</table>
+</div>
+
+  <div id="fm-main-content"></div>
+<div class="fm-status-bar">
+  <table>
+    <tr><td id="fm-status">&nbsp; last tr</td></tr>
+
+  </table>
 </div>

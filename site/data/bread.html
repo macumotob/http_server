@@ -1,0 +1,123 @@
+﻿
+<!--#fm-file-row-->
+<div class="row">
+  <div class="col-xs-12 bg-success">
+    <p style="cursor:pointer"
+       data-method="fm_get_file" data-args="{{encodeURI(item.name)}}"><b>{{item.name}}</b></p>
+
+    <p style="font-size:xx-small;">
+      <div class="row">
+        <div class="col-xs-3">{{fm_format(item.size)}}</div>
+        <div class="col-xs-3 text-success text-center" data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">view</div>
+        <div class="col-xs-3 text-primary text-center" 
+             data-method="fm_downlod_file" data-args="{{encodeURI(item.name)}}">download</div>
+        <div class="col-xs-3 text-primary text-center"
+             data-method="fm_delete_file" 
+             data-args="{{encodeURI(item.name)}}"><b>{{get_file_ext(item.name)}}</b></div>
+      </div>
+    </p>
+  </div>
+</div>
+<!--#fm-folder-row-->
+<div class="row">
+  <div class="btn btn-primary col-xs-12 text-left"
+       data-method="init_document" data-args="{{encodeURI(item.name)}}">
+    {{item.name}}
+  </div>
+</div>
+
+<!--#fm-list-header-->
+<table class="table table-striped" style="cursor:pointer">
+  <!--#fm-list-folder-body-->
+  <tr class="text-primary">
+    <td data-method="init_document" data-args="{{encodeURI(item.name)}}">
+      <b><i>{{item.name}}</i></b>
+    </td>
+    <td data-method="init_document" data-args="{{encodeURI(item.name)}}">&gt;</td>
+  </tr>
+  <!--#fm-list-file-body-->
+  <tr class="text-success">
+    <td colspan="2" data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">
+<p><b>{{item.name}}</b></p>
+      <div class="row">
+        <div class="col-xs-3">{{get_file_ext(item.name)}}</div>
+        <div class="col-xs-3">{{fm_format(item.size)}}</div>
+        <div class="col-xs-3 text-success text-center" 
+             data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">view</div>
+        <div class="col-xs-3 text-primary text-center"
+             data-method="fm_downlod_file" data-args="{{encodeURI(item.name)}}">download</div>
+      </div>
+
+</td>
+   <!-- <td><b>{{get_file_ext(item.name)}}</b></td>-->
+  </tr>
+  <!--#fm-list-footer-->
+</table>
+
+<!--#fm-popup-header-->
+<table class="table table-hover">
+  <thead>
+    <tr><th>Перейти в папку</th></tr>
+  </thead>
+  <tbody>
+    <!--#fm-popup-body-->
+    <tr>
+<td data-method="fm_refresh_by_index" data-args="{{index}}">{{decodeURI(item)}}</td>
+<td>&gt;</td>
+</tr>
+    <!--#fm-popup-footer-->
+  </tbody>
+</table>
+
+<!--#fm-bread-header-->
+<table class="table table-striped">
+  <tr>
+    <!--#fm-bread-body-->
+    {{*   var text = decodeURI(item); text = text[text.length - 1] == '/' ? text : text + '/';}}
+    <td data-method="fm_refresh_by_index" data-args="{{index}}">{{text}}</td>
+    <!--#fm-bread-footer-->
+  </tr>
+</table>
+<!--#fm-create-folder-->
+<form class="form-horizontal">
+  <div class="form-group">
+    <label for="input-folder-name">New Folder Name</label>
+    <input type="text" class="form-control" id="input-folder-name" placeholder="Enter folder name">
+  </div>
+  <button class="btn btn-default" data-method="fm_refresh">Cancel</button>
+  <button class="btn btn-success" data-method="fm_create_folder">Create</button>
+</form>
+
+<!--#fm-upload-form-->
+<div class="upload-form">
+  <div class="upload-form-header">Upload files to server</div>
+
+  <input type="file"
+         onchange="coba_upload_show_info();"
+         id="control_upload_files" multiple style="visibility:hidden;position:absolute;top:-50px;left:-50px" />
+
+  <table class="table">
+    <tr>
+      <td class="button bg-success" onclick="control_upload_files.click();">Select</td>
+      <td class="button bg-success" onclick="coba_upload_files();">Upload</td>
+      <td class="button bg-success" onclick="fm_refresh();">Cancel</td>
+    </tr>
+  </table>
+
+  <div class="upload-form-content">
+    <table id="control_progress" style="width:100%;"></table>
+  </div>
+
+</div>
+<!--#fm-empty-folder-->
+<form class="form">
+<div class="col-xs-12 text-center text-danger"><b>{{lng.ef.worning}}</b></div>
+  <div class="col-xs-12 text-center">
+    <p>{{lng.ef.folder}} <b>{{item}}</b> {{lng.ef.is_empty}}.</p>
+      <p>{{lng.ef.can}}
+      <b class="text-success" data-method="create_folder_form">{{lng.ef.create}}</b> ,
+      <b class="text-success" data-method="create_upload_form">{{lng.ef.upload}}</b> {{lng.ef.or}}
+      <b class="text-success" data-method="init_document" data-args="..">{{lng.ef.goback}}</b>
+    </p>
+  </div>
+</form>

@@ -1,5 +1,3 @@
-
-
 function id(name) {
   var items = document.querySelectorAll(name);
   return items[0];
@@ -12,38 +10,16 @@ function load_async(file,onsuccess) {
     if (xhr.readyState == 4) {
       if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
         var text = xhr.responseText;
-      //  var heders = xhr.getResponseHeader("content-type");
         onsuccess(text);
       }
     }
   };
   xhr.send(null);
 }
-function load_sync(file) {
-  var xhr = new XMLHttpRequest();
-  xhr.open("get", file, false);
-  var result;
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4) {
-      if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
-        var text = xhr.responseText;
-        result = text;
-      }
-    }
-  };
-  xhr.send(null);
-  return result;
-}
-
 function load_async_json(file, onsuccess) {
   load_async(file, function (text) {
-    try{
-      var x = eval('(' + text + ')');
-      onsuccess(x);
-    }
-    catch (err) {
-      alert("Error eval json:" + err + "\n" + text);
-    }
+    var x = eval(text);
+    onsuccess(x);
   });
 }
 function load_async_script(file) {

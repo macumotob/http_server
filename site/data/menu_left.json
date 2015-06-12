@@ -23,7 +23,8 @@
       { name: "zakas", url: "books/nicholas c. zakas - high performance javascript 2010.pdf" },
       { name : "Professional JavaScript for Web Developers" , url : "books/zakas/Nicholas C. Zakas - Professional JavaScript for Web Developers (Programmer to Programmer) - 2011.pdf"},
       { name: "todo", url: "test_nodejs.js?name=sd123&y=iuyiuy" },
-      { name: "todo 2", url: "test_nodejs?name=sd123&y=iuyiuy" }
+      { name: "todo 2", url: "test_nodejs?name=sd123&y=iuyiuy" },
+      {"name": "worker", url:"../worker/worker1.html"}
     ]
   },
   {

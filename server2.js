@@ -2,7 +2,7 @@ var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
-
+mk = require("./maketor"),
     port = 3030,
     host= "localhost",
     wdir = "site",
@@ -52,11 +52,13 @@ function show_404(req, res, text) {
   res.write(text);
   res.end();
 }
+/*
 function send_json(res, text) {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.write(text);
   res.end();
 }
+*/
 function convert_path(arr,folder) {
   var arr_path = folder.split('/');
   var xpath;
@@ -71,10 +73,43 @@ function convert_path(arr,folder) {
   }
   return xpath;
 }
+function path_convert(folder) {
+  var arr_path = folder.split('/');
+  var xpath;
+  for (var i = 0, max = public_folders.length; i < max ; i++) {
+    item = public_folders[i];
+    if (('~' + item.name) === arr_path[0]) {
+      arr_path.shift();
+      xpath = item.path + arr_path.join('/');
+      return xpath;
+    }
+  }
+  return folder;
+}
+
+var public_folders;
+
+function load_public_folders() {
+  fs.readFile('site/mobile/data/folders.json', { encoding: 'utf-8' }, function (err, data) {
+    if (err) {
+      console.log("error in load_public_folders" + err);
+      return;
+    }
+
+    if (data) {
+      public_folders = eval("public_folders=" + data);
+     // console.log(public_folders);
+    }
+  });
+}
+
 function redirect(callback) {
   fs.readFile('mobile/data/folders.json', { encoding: 'utf-8' }, function (err, data) {
-    if (err)
-      throw err;
+    if (err) {
+      console.log("error in redirect" + err);
+      return;
+    }
+  //    throw err;
 
     if (data) {
       var arr = eval("arr=" + data);
@@ -83,6 +118,7 @@ function redirect(callback) {
     }
   });
 }
+/*
 function send_registered_folders(response,folders) {
 
   var s = "x=[";
@@ -95,182 +131,187 @@ function send_registered_folders(response,folders) {
   response.writeHead(200, { "Content-Type": "text/plain" });
   response.write(s);
   response.end();
+}*/
+function send_text(res,s) {
+  res.writeHead(200,
+  {"Content-Type": "text/plain" },
+  {"Cache-Control" : "no-cache, no-store, must-revalidate"},
+  {"Pragma" : "no-cache"},
+  {"Expires": 0 });
+  res.write(s);
+  res.end();
+}
+function send_json(res, data) {
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.write(JSON.stringify(data));
+  res.end();
+
 }
 function send_folder_content(response, folder) {
-  redirect( function (folders) {
-
-    if (folder === "root") {
-      send_registered_folders(response,folders);
-    }
-    else {
-      var s = "x=[";
-
-      var arr_path = folder.split('/');
-      var xpath = convert_path(folders, folder);
-
-      if (xpath) {
-        var fs2 = require('fs');
-        var files = fs2.readdirSync(xpath);
-
-        for (var i in files) {
-          var currentFile = xpath + files[i];
-          var stats = fs2.statSync(currentFile);
-          if (i > 0) s += ",";
-          if (stats.isFile()) {
-            s += "{name:'" + files[i] + "',d:0}";
-          }
-          else if (stats.isDirectory()) {
-            s += "{name:'" + files[i] + "/',d:1}"; //traverseFileSystem(currentFile);
-          }
-        }
-      }
-      else {
-        s += "{name:'Error read " + folder + "',d:1}";
-      }
-      s += "]";
-
-      response.writeHead(200, { "Content-Type": "text/plain" });
-      response.write(s);
-      response.end();
-    }
-      
-  });
+ // console.log("send_folder_content :" + folder);
+  var f = mk.get_folder_content(folder,public_folders);
+  send_json(response,f);
 }
 
-function send_file_content(response, filename) {
-
-  redirect(function (folders) {
-    var file = convert_path(folders,filename);
-    send_file(response, file, false);
-  });
-}
 
 function fm_create_folder(res, folder, name) {
-  console.log(folder + ' name:' + name);
-  redirect(function (folders) {
-    var xpath = convert_path(folders, folder) + name;
-    try {
-      fs.mkdirSync(xpath, { encoding: 'utf8' });
-      send_json(res, "x={result: true, msg: 'created success', name:'" + xpath + "'}");
-    } catch (e) {
-      console.log(e.toString());
-      send_json(res, "x={result: false, msg: '" + e.toString() + "', name:'" + xpath + "'}");
-      //if (e.code != 'EEXIST') {
-      //  send_json(res, "x={result: false, msg: ' Exists: " + e.massege + "', name:'" + xpath + "'}");
-      //}
-      //else {
-      //  send_json(res, "x={result: false, msg: '" + e.massege + "', name:'" + xpath + "'}");
-      //}
-    }
-  });
+  var xpath = folder + name;
+ // console.log("fm_create_folder : " + xpath);
+  try {
+    fs.mkdirSync(xpath, { encoding: 'utf8' });
+    send_json(res, { result: 1, msg: "created" });
+    load_public_folders();
+  } catch (e) {
+    console.log(e.toString());
+    send_json(res, {result: 0, msg: e.toString() });
+  }
 }
-function send_file_part(req, res,file) {
+function send_file_part(req, res, file, x) {
 
-  var maxchunk = 1024 * 1024;
+  var maxchunk = 64 * 1024;
 
   var stats = fs.statSync(file);
   var total = stats["size"];
+  var start = 0, end = total - 1;
 
-  var range = req.headers.range;
-  var positions = range.replace(/bytes=/, "").split("-");
+  if (x.range) {
+    var positions = x.range.replace(/bytes=/, "").split("-");
+    start = parseInt(positions[0], 10);
+    end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+  }
+  var chunksize = (end - start) + 1
 
-  var start = parseInt(positions[0], 10);
-  
-  // var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
-  var end = positions[1] ? parseInt(positions[1], 10) : total -1;
-  var chunksize = (end - start) + 1;
-  //if (chunksize > maxchunk) {
-  //  chunksize = maxchunk;
-  //  end = start + chunksize - 1;
-  //}
- // var total = movie_mp4.length;
-  console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
-  console.log("total: " + total + " " + file);
+ // console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
+//  console.log("total: " + total + " " + file);
 
   var options = {
     'flags': 'r'
   , 'encoding': null
   , 'mode': 0666
-  , 'bufferSize': 64 * 1024
+  , 'bufferSize': maxchunk
   , 'start': start
-  , 'end' :end
+  , 'end': end
   };
 
   res.writeHead(206, {
+    //if(x.winphone){
+    "Access-Control-Allow-Origin": "*",
+    "TransferMode.DLNA.ORG": "Streaming",
+    "File-Size": chunksize,
+
     "Content-Range": "bytes " + start + "-" + end + "/" + total,
     "Accept-Ranges": "bytes",
     "Content-Length": chunksize,
-    "Content-Type": "video/mp4"
+    //   "Content-Type": "video/mp4"
   });
 
-  //var data = '';
   var stream = fs.createReadStream(file, options)
   .on('data', function (chunk) {
-    //data += chunk;
     res.write(chunk);
   })
   .on('error', function (err) {
-    console.log("error :" + err);
+ //   console.log("error :" + err);
     res.end();
   })
   .on('end', function () {
     res.end();
-    console.log("end...:" + file);
+   // console.log("end...:" + file);
   }).read();
 
 }
-function process_command(x,i,req, res) {
-  try {
+//function process_command2(x,i,req, res) {
+//  try {
 
-    var cmd = x.substr(i + 1, x.length - i);
-    var func = x.substr(1, i - 1);
+//    var cmd = x.substr(i + 1, x.length - i);
+//    var func = x.substr(1, i - 1);
 
-    var qs = require("querystring");
-    var prms = qs.parse(cmd);
-  //  console.log(cmd  + '  ' + func);
-    if(func === "get.folder"){
-      send_folder_content(res,prms.folder);
-      return;
-    }
+//    var qs = require("querystring");
+//    var prms = qs.parse(cmd);
+//  //  console.log(cmd  + '  ' + func);
+//    if(func === "get.folder"){
+//      send_folder_content(res,prms.folder);
+//      return;
+//    }
 
-    if (func === "get.file") {
-      var f = prms.file;
-      //console.log(req.headers);
-      var range = req.headers['range'];
-      if (range) {
-        redirect(function (folders) {
-          var xpath = convert_path(folders, f);
-          send_file_part(req, res, xpath);
-        });
-      }
-      else {
-        send_file_content(res, f);
-      }
-      return;
-    }
+//    if (func === "get.file") {
+//      var f = prms.file;
+//      //console.log(req.headers);
+//      var range = req.headers['range'];
+//      if (range) {
+//        redirect(function (folders) {
+//          var xpath = convert_path(folders, f);
+//          send_file_part(req, res, xpath);
+//        });
+//      }
+//      else {
+//        send_file_content(res, f);
+//      }
+//      return;
+//    }
 
-    if (func === "mkdir") {
-      fm_create_folder(res, prms.folder, prms.name);
-      return;
-    }
-    eval(fs.readFileSync(func) + '');
-    func = func.substr(func, func.indexOf('.'));
-    var s = func + "(response,prms);";
-    eval(s);
-  }
-  catch (err) {
-    console.log("ERROR !!!!!!!");
-    error_handler(res, err);
-  }
-}
+//    if (func === "mkdir") {
+//      fm_create_folder(res, prms.folder, prms.name);
+//      return;
+//    }
+//    eval(fs.readFileSync(func) + '');
+//    func = func.substr(func, func.indexOf('.'));
+//    var s = func + "(response,prms);";
+//    eval(s);
+//  }
+//  catch (err) {
+//    console.log("ERROR !!!!!!!");
+//    error_handler(res, err);
+//  }
+//}
+//function process_command(x, req, res) {
+//  try {
+
+//    console.log(" x.func:" + x.func);
+//    //if (x.func === "get.folder") {
+//    //  console.log("folder" +x.prms.folder);
+//    //  send_folder_content(res, x.prms.folder);
+//    //  return;
+//    //}
+
+//    //if (x.func === "get.file") {
+//    //  var f = x.file;
+//    //  if (x.range || x.winphone) {
+//    //    redirect(function (folders) {
+//    //      var xpath = convert_path(folders, f);
+//    //      send_file_part(req, res, xpath);
+//    //    });
+//    //  }
+//    //  else {
+//    //    send_file_content(res, f);
+//    //  }
+//    //  return;
+//    //}
+
+//    //if (x.func === "mkdir") {
+//    //  fm_create_folder(res, prms.folder, prms.name);
+//    //  return;
+//    //}
+//    eval(fs.readFileSync(x.func) + '');
+//    x.func = x.func.substr(x.func, x.func.indexOf('.'));
+//    var s = x.func + "(response,prms);";
+//    eval(s);
+//  }
+//  catch (err) {
+//    console.log("ERROR !!!!!!!");
+//    error_handler(res, err);
+//  }
+//}
 
 function send_file(response,filename,is_mobile) {
 
+ // console.log("send_file : " + filename);
+  is_mobile = true;
   var contentTypesByExtension = {
     '.html': "text/html",
     '.css':  "text/css",
     '.js': "text/javascript",
-    '.json':"application/json"
+    '.json': "application/json",
+'.txt':"text/plain"
   };
 
 
@@ -280,14 +321,19 @@ function send_file(response,filename,is_mobile) {
       response.write("404 Not Found\n");
       response.write(" File : " + filename);
       response.end();
-      console.log('error 404');
-      return;
+      console.log('error 404 not exists:' + filename);
+      return false;
     }
 
     if (fs.statSync(filename).isDirectory()) {
       filename += (is_mobile ? '/mobile/index.html': '/index.html');
     }
    
+    var stats = fs.statSync(filename);
+    var total = stats["size"];
+
+//    console.log("send size :" + total + " file" + filename);
+
     var headers = {};
     var ext = path.extname(filename);
     var contentType = contentTypesByExtension[ext];
@@ -296,36 +342,21 @@ function send_file(response,filename,is_mobile) {
     }
     else {
     }
-    response.writeHead(200, headers);
+
+  //  206 Partial Content
+  //  Content-Type: video/mp4
+    headers["Content-Length"] = total;
+    headers["Accept-Ranges"] = "bytes";
+    headers["Content-Range"] = "bytes 0-" + total + "/" + total;
+    
+    response.writeHead(206, headers);
 
     var stream = fs.createReadStream(filename, "binary")
     .on('data', function (data) { response.write(data); })
     .on('error', function (error) { response.end(); console.log(error); })
     .on('end', function () { response.end(); }).read();
-/*
-
-    fs.readFile(filename, "binary", function (err, file) {
-      if (err) {
-        response.writeHead(500, { "Content-Type": "text/plain" });
-        response.write(err + "\n");
-        response.end();
-        console.log('error 500');
-        return;
-      }
-
-      var headers = {};
-      var ext = path.extname(filename);
-      var contentType = contentTypesByExtension[ext];
-      if (contentType) {
-        headers["Content-Type"] = contentType;
-      }
-      else {
-      }
-      response.writeHead(200, headers);
-      response.write(file, "binary");
-      response.end();
-    });*/
   });
+  return true;
 }
 function upload_file(req, res, info) {
 
@@ -365,71 +396,140 @@ function upload_file(req, res, info) {
     }
   });
 }
-http.createServer(function(request, response) {
+
+
+function check_redirect(req) {
+
+  var query = decodeURIComponent(req.url);
+  var uri = query;
+  
+  var p = decodeURIComponent(url.parse(req.url).pathname)
+    , filename = decodeURIComponent(path.join(process.cwd(), p));
+
+
+  var ua = req.headers['user-agent'];
+  var is_mobile = ua && /phone|iphone/i.test(ua);
+
+  var x = {
+    func: "/",
+    file:filename,
+    prms: null,
+    mobile: (ua && /phone|iphone/i.test(ua)),
+    query: query,
+    range: req.headers['range'],
+    winphone: req.headers['getcontentfeatures.dlna.org'],
+    useragent : req.headers['user-agent']
+  };
+
+  var i = query.indexOf("?");
+
+  if (i > -1) {
+    var strprms = query.substr(i + 1, query.length - i);
+    x.func = query.substr(1, i - 1);
+
+    var qs = require("querystring");
+    x.prms = qs.parse(strprms);
+    for (var prop in x.prms) {
+      x.prms[prop] = path_convert(x.prms[prop]);
+    }
+  }
+  if (query.indexOf("/~") === 0) {
+    uri = query.substr(1);
+    //x.query = path.join(process.cwd(),path_convert(uri));
+    x.file= path_convert(uri);
+  }
+  if (false) {
+    console.log("------- x <<<---------------------");
+    console.log("  x.file:" + x.file);
+    console.log("  x.query:" + x.query);
+    console.log("  x.func:" + x.func);
+    console.log("  x.mobile:" + x.mobile);
+    console.log("  x.range:" + x.range);
+    console.log("  x.winphone:" + x.winphone);
+    console.log("  x.useragent:" + x.useragent);
+    if (x.prms) {
+      console.log("-------prms <<<---------------------");
+      for (var prop in x.prms) {
+        console.log("   " + prop + "=" + x.prms[prop]);
+      }
+      console.log("------->>>---------------------");
+    }
+    console.log(" .. headers:");
+    for (var prop in req.headers) {
+      console.log("   " + prop + "=" + req.headers[prop]);
+    }
+
+    console.log("-------x >>>---------------------");
+  }
+  return x;
+}
+
+http.createServer(function(req, res) {
 
   try {
+   var x = check_redirect(req);
 
-    var uri = decodeURIComponent(url.parse(request.url).pathname)
-      , filename = decodeURIComponent(path.join(process.cwd(), uri));
+  //  console.log("url:" +decodeURIComponent(request.url));
+  //  var uri = decodeURIComponent(url.parse(request.url).pathname)
+ //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
   
-    var query= decodeURIComponent(request.url);
-    var ua = request.headers['user-agent'];
-    var is_mobile = /phone|iphone/i.test(ua);
+    var query= decodeURIComponent(req.url);
+    var ua = req.headers['user-agent'];
+  //  var is_mobile = /phone|iphone/i.test(ua);
 
-    if (query.indexOf('/~') === 0) {
-      redirect(function (folders) {
-        var xpath = convert_path(folders, query.substr(1));
-        console.log(request.headers);
-        var range = request.headers['range'];
-        if (range) {
-          console.log('send part file :[' + range);
-          send_file_part(request, response, xpath);
-        }
-        else {
-          console.log('send file :' + xpath);
-          send_file(response, xpath, is_mobile);
-        }
+    switch (x.func) {
+      case "get.folder":
+        return send_folder_content(res, x.prms.folder);
 
+       case "get.file":
+         if (x.range || x.winphone) {
+         //  console.log(x.prms.file);
+           return send_file_part(req, res, x.prms.file,x);
+          }
+         return send_file(res, x.prms.file, x.mobile);
+      case "get.maket":
+       // console.log(wfolder + x.prms.name);
+        mk.parse(wfolder + x.prms.name, function (data) { send_json(res,data);});
         return;
-      });
-    }
-   //  console.log('query:' +query);
-
-    var i = query.indexOf("?");
-    if (i > -1) {
-      process_command(query, i, request, response);
-      return;
+      case "mkdir":
+        return fm_create_folder(res, x.prms.folder, x.prms.name);
+       
+      default:
+        break;
     }
 
-    if (query === '/open' || query === '/continue' || query === '/close') {
-      console.log('command : ' + query);
-      var action = request.headers['baybak-action'];
-      var info = request.headers['coba-file-info'];
-      var ctype = request.headers['content-type'];
-      if (ctype) {
-        console.log('type   :'+ctype);
-      }
-      if (action) {
-        console.log("action : " + action);
-      }
-      if (info) {
-        var qs = require("querystring");
-        var prms = qs.parse(info);
-        upload_file(request, response, prms);
+    if (x.func === "/") {
 
+      if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
+        var action = req.headers['baybak-action'];
+        var info = req.headers['coba-file-info'];
+        var ctype = req.headers['content-type'];
+        if (ctype) {
+          //console.log('type   :' + ctype);
+        }
+        if (action) {
+          //console.log("action : " + action);
+        }
+        if (info) {
+         // console.log("upload info:" + info);
+          var qs = require("querystring");
+          var prms = qs.parse(info);
+          upload_file(req, res,prms);
+        }
+        return;
       }
-    }
-    else if (query === '/upload') {
-      console.log(request.url);
-    }
-    else {
-   //   var range = request.headers['range'];
-   //   console.log('send file :[' + range);
-      send_file(response, filename, is_mobile);
+   
+       if (x.range || x.winphone === "1") {
+          send_file_part(req, res, x.file, x);
+          }
+          else {
+           send_file(res, x.file,x.mobile);
+         }
+        return;
     }
   }
   catch (err) {
-    error_handler(response, err);
+    error_handler(res, err);
   }
 }).listen(port,host);
 
@@ -461,6 +561,7 @@ function register_server() {
 }
 
 //register_server();
+load_public_folders();
 
 process.chdir(wdir);
 var os = require("os");
