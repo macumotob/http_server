@@ -1,5 +1,5 @@
 ﻿[
-  { "name": "Users"   , "path" : "C:/Users/"},
+  { "name": "Tests"   , "path" : "E:/Tests/"},
   { "name": "Фильмы"  , "path": "E:/Films/" },
   { "name": "Книги"   , "path": "E:/Books/" },
   { "name": "Загрузки", "path": "E:/Downloads/" },

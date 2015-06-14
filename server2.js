@@ -11,6 +11,7 @@ mk = require("./maketor"),
 
 process.argv.forEach(function (val, index, array) {
  
+  wfolder = process.cwd() + "/" + wdir + "/";
   switch(index)  {
     case 2:
       host = process.argv[2];
@@ -90,7 +91,8 @@ function path_convert(folder) {
 var public_folders;
 
 function load_public_folders() {
-  fs.readFile('site/mobile/data/folders.json', { encoding: 'utf-8' }, function (err, data) {
+  var fileName = "site/mobile/data/folders.json";
+  fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
     if (err) {
       console.log("error in load_public_folders" + err);
       return;
@@ -104,7 +106,8 @@ function load_public_folders() {
 }
 
 function redirect(callback) {
-  fs.readFile('mobile/data/folders.json', { encoding: 'utf-8' }, function (err, data) {
+  var fileName = "/mobile/data/folders.json";
+  fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
     if (err) {
       console.log("error in redirect" + err);
       return;
@@ -142,10 +145,14 @@ function send_text(res,s) {
   res.end();
 }
 function send_json(res, data) {
-  res.writeHead(200, { "Content-Type": "application/json" });
+  res.writeHead(200,
+ { "Content-Type": "application/json" },
+ { "Cache-Control": "no-cache, no-store, must-revalidate" },
+ { "Pragma": "no-cache" },
+ { "Expires": -1 }
+);
   res.write(JSON.stringify(data));
   res.end();
-
 }
 function send_folder_content(response, folder) {
  // console.log("send_folder_content :" + folder);
@@ -160,7 +167,7 @@ function fm_create_folder(res, folder, name) {
   try {
     fs.mkdirSync(xpath, { encoding: 'utf8' });
     send_json(res, { result: 1, msg: "created" });
-    load_public_folders();
+ //   load_public_folders();
   } catch (e) {
     console.log(e.toString());
     send_json(res, {result: 0, msg: e.toString() });
@@ -178,6 +185,9 @@ function send_file_part(req, res, file, x) {
     var positions = x.range.replace(/bytes=/, "").split("-");
     start = parseInt(positions[0], 10);
     end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+    if (end === 1) {
+      end = total - 1;
+    }
   }
   var chunksize = (end - start) + 1
 
@@ -201,8 +211,8 @@ function send_file_part(req, res, file, x) {
 
     "Content-Range": "bytes " + start + "-" + end + "/" + total,
     "Accept-Ranges": "bytes",
-    "Content-Length": chunksize,
-    //   "Content-Type": "video/mp4"
+    "Content-Length": chunksize
+ //   "Content-Type": "video/mp4"
   });
 
   var stream = fs.createReadStream(file, options)
@@ -210,7 +220,7 @@ function send_file_part(req, res, file, x) {
     res.write(chunk);
   })
   .on('error', function (err) {
- //   console.log("error :" + err);
+    console.log("error :" + err);
     res.end();
   })
   .on('end', function () {
@@ -219,88 +229,70 @@ function send_file_part(req, res, file, x) {
   }).read();
 
 }
-//function process_command2(x,i,req, res) {
-//  try {
+function send_file_quicktime(req, res, file, x) {
 
-//    var cmd = x.substr(i + 1, x.length - i);
-//    var func = x.substr(1, i - 1);
+  console.log("QT :" + file);
+  var maxchunk = 64 * 1024;
 
-//    var qs = require("querystring");
-//    var prms = qs.parse(cmd);
-//  //  console.log(cmd  + '  ' + func);
-//    if(func === "get.folder"){
-//      send_folder_content(res,prms.folder);
-//      return;
-//    }
+  var stats = fs.statSync(file);
+  var total = stats["size"];
+  var start = 0, end = total - 1;
 
-//    if (func === "get.file") {
-//      var f = prms.file;
-//      //console.log(req.headers);
-//      var range = req.headers['range'];
-//      if (range) {
-//        redirect(function (folders) {
-//          var xpath = convert_path(folders, f);
-//          send_file_part(req, res, xpath);
-//        });
-//      }
-//      else {
-//        send_file_content(res, f);
-//      }
-//      return;
-//    }
+  if (x.range) {
+    var positions = x.range.replace(/bytes=/, "").split("-");
+    start = parseInt(positions[0], 10);
+    end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+    if (end === 1) {
+      end = total - 1;
+    }
+  }
+  else
+  {
+    start = 0; end = total - 1;
+  }
+  var chunksize = (end - start) + 1
 
-//    if (func === "mkdir") {
-//      fm_create_folder(res, prms.folder, prms.name);
-//      return;
-//    }
-//    eval(fs.readFileSync(func) + '');
-//    func = func.substr(func, func.indexOf('.'));
-//    var s = func + "(response,prms);";
-//    eval(s);
-//  }
-//  catch (err) {
-//    console.log("ERROR !!!!!!!");
-//    error_handler(res, err);
-//  }
-//}
-//function process_command(x, req, res) {
-//  try {
+  console.log("QT start:" + start + " end:" + end + " chunk:" + chunksize);
+  //  console.log("total: " + total + " " + file);
 
-//    console.log(" x.func:" + x.func);
-//    //if (x.func === "get.folder") {
-//    //  console.log("folder" +x.prms.folder);
-//    //  send_folder_content(res, x.prms.folder);
-//    //  return;
-//    //}
+  var options = {
+    'flags': 'r'
+  , 'encoding': null
+  , 'mode': 0666
+  , 'bufferSize': maxchunk
+  , 'start': start
+  , 'end': end
+  };
 
-//    //if (x.func === "get.file") {
-//    //  var f = x.file;
-//    //  if (x.range || x.winphone) {
-//    //    redirect(function (folders) {
-//    //      var xpath = convert_path(folders, f);
-//    //      send_file_part(req, res, xpath);
-//    //    });
-//    //  }
-//    //  else {
-//    //    send_file_content(res, f);
-//    //  }
-//    //  return;
-//    //}
+  res.writeHead((x.range? 206 :200), {
+    //if(x.winphone){
+    //"Access-Control-Allow-Origin": "*",
+    //"File-Size": chunksize,
 
-//    //if (x.func === "mkdir") {
-//    //  fm_create_folder(res, prms.folder, prms.name);
-//    //  return;
-//    //}
-//    eval(fs.readFileSync(x.func) + '');
-//    x.func = x.func.substr(x.func, x.func.indexOf('.'));
-//    var s = x.func + "(response,prms);";
-//    eval(s);
-//  }
-//  catch (err) {
-//    console.log("ERROR !!!!!!!");
-//    error_handler(res, err);
-//  }
-//}
+    "Content-Range": "bytes " + start + "-" + end + "/" + total,
+    "Accept-Ranges": "bytes",
+    "Content-Length": chunksize,
+    "Content-Type": "video/mp4"
+  });
+  //if (chunksize === 2) {
+  //  res.write("\0\0");
+  //  res.end();
+  //  return;
+  //}
+  var stream = fs.createReadStream(file, options)
+  .on('data', function (chunk) {
+    res.write(chunk);
+  })
+  .on('error', function (err) {
+    console.log("error :" + err);
+    res.end();
+  })
+  .on('end', function () {
+    res.end();
+    // console.log("end...:" + file);
+  }).read();
+
+}
 
 function send_file(response,filename,is_mobile) {
 
@@ -362,8 +354,8 @@ function upload_file(req, res, info) {
 
   var filename = decodeURIComponent(info.name);
 
-  redirect(function (folders) {
-    var file = convert_path(folders, filename);
+//  redirect(function (folders) {
+    var file = convert_path(public_folders, filename);
 
 
     if (req.method == 'POST') {
@@ -394,7 +386,7 @@ function upload_file(req, res, info) {
       res.writeHead(405, { 'Content-Type': 'text/plain' });
       res.end();
     }
-  });
+  //});
 }
 
 
@@ -469,20 +461,27 @@ http.createServer(function(req, res) {
   try {
    var x = check_redirect(req);
 
-  //  console.log("url:" +decodeURIComponent(request.url));
+//    console.log("url:" +decodeURIComponent(req.url));
   //  var uri = decodeURIComponent(url.parse(request.url).pathname)
  //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
   
     var query= decodeURIComponent(req.url);
     var ua = req.headers['user-agent'];
+    var quicktime = ua.indexOf("QuickTime") >= 0;
+    console.log("agent:" + ua);
+    console.log("range:" + x.range + " quick:" + quicktime);
+    console.log(req.headers);
   //  var is_mobile = /phone|iphone/i.test(ua);
 
     switch (x.func) {
       case "get.folder":
         return send_folder_content(res, x.prms.folder);
 
-       case "get.file":
-         if (x.range || x.winphone) {
+      case "get.file":
+        if (quicktime) {
+          return send_file_quicktime(req, res, x.prms.file, x);
+        }
+        if (x.range || x.winphone) {
          //  console.log(x.prms.file);
            return send_file_part(req, res, x.prms.file,x);
           }
@@ -518,8 +517,12 @@ http.createServer(function(req, res) {
         }
         return;
       }
-   
-       if (x.range || x.winphone === "1") {
+    //  send_file(res, x.file, x.mobile);
+      //  return;
+      if (quicktime) {
+        send_file_quicktime(req, res, x.file, x);
+      }
+      else if (x.range || x.winphone === "1") {
           send_file_part(req, res, x.file, x);
           }
           else {
@@ -566,8 +569,8 @@ load_public_folders();
 process.chdir(wdir);
 var os = require("os");
 wfolder =  process.cwd();
-console.log(os.hostname() + "  cwd:" + wfolder);
+console.log("host : " + os.hostname() + "\nfolder:" + wfolder);
 
 
-console.log("Static file server running at\n  => http://"
+console.log("Static file server running at http://"
     + host + ":" + port + "/\nCTRL + C to shutdown");

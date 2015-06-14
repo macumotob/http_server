@@ -89,8 +89,7 @@
 </form>
 
 <!--#fm-upload-form-->
-<div class="upload-form">
-  <div class="upload-form-header">Upload files to server</div>
+  <div class="text-center" >Upload files to server</div>
 
   <input type="file"
          onchange="coba_upload_show_info();"
@@ -98,17 +97,14 @@
 
   <table class="table">
     <tr>
-      <td class="button bg-success" onclick="control_upload_files.click();">Select</td>
-      <td class="button bg-success" onclick="coba_upload_files();">Upload</td>
-      <td class="button bg-success" onclick="fm_refresh();">Cancel</td>
+      <td class="text-center text-success" onclick="control_upload_files.click();"><b>Select</b></td>
+      <td class="text-center text-success" onclick="coba_upload_files();"><b>Upload</b></td>
+      <td class="text-center text-success" onclick="fm_refresh();"><b>Cancel</b></td>
     </tr>
   </table>
 
-  <div class="upload-form-content">
-    <table id="control_progress" style="width:100%;"></table>
-  </div>
-
-</div>
+  
+    <table class="table container" id="control_progress"></table>
 <!--#fm-empty-folder-->
 <form class="form">
 <div class="col-xs-12 text-center text-danger"><b>{{lng.ef.worning}}</b></div>
@@ -121,3 +117,33 @@
     </p>
   </div>
 </form>
+
+<!--#fm-video-header-->
+<table class="table">
+<!--#fm-video-body-->
+<tr><td>
+      <video id="thumb" controls preload="metadata">
+        <source src="{{item.name}}">
+     </video>
+</td></tr>
+<!--#fm-video-footer-->
+</table>
+<!--#fm-upload-complete-->
+<div class="container">
+<p class="text-primary" > Upload complete successfully</p>
+<p> <b data-method="fm_refresh">Refresh folder content</b></p>
+<p> <b data-method="create_upload_form">Upload More files</b></p>
+</div>
+<!--#fm-video-header-->
+<div id="rot">
+{{*//var src='get.file?file=' + fm.join_path() + item[0];alert(src);}}
+  <video id="video" width="320px" height="240px"
+         src="{{'get.file?file=' + fm.join_path() + item[0]}}" controls="true"></video>
+</div>
+<div class="container pre-scrollable">
+  <table class="table">
+    <!--#fm-video-body-->
+    <tr id="tr{{index}}" data-method="fm.play" data-args="{{index}}"><td>{{index}}</td><td>{{item}}</td></tr>
+    <!--#fm-video-footer-->
+  </table>
+</div>

@@ -67,7 +67,9 @@ var img = {
   this.elem_count.innerHTML = this.images.length;
 }
 };
-
+//         -----------------------------------
+//                 fm
+//-----------------------------------------------
 var fm = {
   stack: [],
   is_popup_visible: false,
@@ -93,8 +95,8 @@ var fm = {
 , can_goback: function () {
   return (this.stack.length > 0);
 }
-  ,get_main_content : function () { return id(this.consts.main_content);}
-  ,set_folder: function (folder) {
+,get_main_content : function () { return id(this.consts.main_content);}
+,set_folder: function (folder) {
     if (folder !== "root") {
       if (folder === "..") {
         this.stack.pop();
@@ -113,7 +115,7 @@ var fm = {
     this.is_popup_visible = false;
     return folder;
   }
-,  join_path: function (decode) {
+,join_path: function (decode) {
     var s = "";
     for (var i = 0, max = this.stack.length ; i < max; i++) {
       var x = this.stack[i];
@@ -122,62 +124,36 @@ var fm = {
     }
     return s;
 }
-//, generate: function (data, maket) {
-
-//  var html = "";
-//  var n = 0, max = data.length;
-
-//  while (n < max) {
-//    var item = data[n];
-//    html += this.generate_one(item, maket, n);
-//    n++;
-//  }
-//  return html;
-//}
-//, generate_one: function (item, maket, index) {
-
-//  var html = "";
-//  var i = 0, count = maket.length;
-//  while (i < count) {
-//    var line = maket[i];
-//    if (line.text) {
-//      html += line.value;
-//      i++;
-//      continue;
-//    }
-
-//      if (line.value === "foreach") {
-//        i++;
-//        while (i < count) {
-//          line = maket[i];
-//          if (line.text) {
-//            html += line.value;
-//            i++;
-//            continue;
-//          }
-//            if (line.value === "endfor") {
-//              i++;
-//              break;
-//            }
-//            html += eval(line.value);
-//            i++;
-//          }
-//      }
-//      else {
-//        html += eval(line.value);
-//        i++;
-//      }
-//  }
-
-//  return html;
-  //}
-, open_file: function (file) {
+,open_file: function (file) {
   var link = document.createElement("a");
   link.href = decodeURI(fm.join_path() + file);
   link.target = "_blank";
   link.click();
 }
-, refresh_current: function () {
+, videos : []
+, video_index: 0
+, degree : 0
+, reset_video: function () {
+  this.videos = [];
+  this.video_index = 0;
+}
+, video_rotate: function () {
+  this.degree += 10;
+  var el = id("#video");//.className = "rot";
+}
+, play: function (index) {
+
+  id("#tr" + this.video_index).className = "text-default";
+
+  var file = this.videos[parseInt(index)];
+  var src = "get.file?file=" + fm.join_path() + file;
+  var el = id("#video");
+  el.src = src;
+  el.play();
+  id("#tr" + index).className = "text-primary";
+  this.video_index = index;
+}
+,refresh_current: function () {
 
   switch (this.state.current) {
     case this.state.upload:
@@ -200,49 +176,7 @@ var fm = {
 }
 };
 
-function getPosition(element) {
 
-  var rect = element.getBoundingClientRect();
-  
-  var docElement = document.documentElement;
-  var body = document.body;
-  var scrollTop = docElement.scrollTop ? docElement.scrollTop : body.scrollTop;
-  var scrollLeft = docElement.scrollLeft ? docElement.scrollLeft : body.scrollLeft;
-  
-  return { x: Math.floor(rect.left + scrollLeft), y: Math.floor(rect.top + scrollTop) };
-}
-function create_pdf_view(parent, filename) {
-  fm.open_file(filename);
-  return;
-  var obj = document.createElement('object');
-  obj.style.width = "100%";
-  obj.style.height = "99%";
-  //obj.setAttribute('width', w);
-  //obj.setAttribute('height', h);
-  var param = document.createElement('param');
-  param.setAttribute('name', 'Src');
-  param.setAttribute('value', filename);
-  obj.appendChild(param);
-
-  var embed = document.createElement('embed');
-  //embed.setAttribute('width', w);
-  //embed.setAttribute('height', h);
-
-  embed.style.width = "100%";
-  embed.style.height = "99%";
-
-  embed.setAttribute('src', filename);
-  embed.setAttribute('href', filename);
-  obj.appendChild(embed);
-  // here is where you need to know where you're inserting it
-
-  // at the end of the body
-  //  document.body.appendChild(obj);
-
-  // OR, into a particular div
-  parent.appendChild(obj);
-
-}
 function get_file_ext(file) {
   var ext = "";
   for (var i = file.length - 1; i > -1; i--) {
@@ -285,43 +219,30 @@ function create_image_view(parent, filename) {
 });
 }
 function create_vidio_view(parent, filename) {
-  var e = document.createElement('video');
-  e.style.width = "100%";
-  e.style.height = "100%";
-  e.autoplay = true;
-  e.src = filename;
-  e.controls = true;
- // e.setAttribute('src', filename);
-  parent.appendChild(e);
+
+
+  return fm_set_main_content(
+generator.generate_one(fm.videos, "fm-video-header",0)
++ generator.generate(fm.videos, "fm-video-body", 0)
++ generator.generate_one(fm.videos,"fm-video-footer")
+  );
+
 }
 function create_upload_form() {
 
   fm.state.current = fm.state.upload;
 
-  var elem = id(fm.consts.main_content);
-  elem.innerHTML = "";
-
-  if (fm.stack.length == 0) {
-    fm_show_error(fm.errors.upload_select_folder);
-  }
-  else {
-    return fm_set_main_content(generator.generate_one(null, "fm-upload-form"));
-    load_async("upload_form.html", function (data) {
-      elem.innerHTML = data;
-      var div = id("#target-folder");
-      //div.innerHTML = join_path(true);
-    });
-  }
-
+return (fm.stack.length == 0 ?
+     fm_show_error(fm.errors.upload_select_folder) 
+   : fm_set_main_content(generator.generate_one(null, "fm-upload-form"))
+  );
 }
 function create_folder_form() {
 
-  if (fm.stack.length == 0) {
-    fm_show_error(fm.errors.create_folder);
-    return;
-  }
-  var html = generator.generate_one(null, "fm-create-folder");
-  fm.get_main_content().innerHTML = html;
+  return (fm.stack.length == 0 ?
+    fm_show_error(fm.errors.create_folder) 
+  : fm_set_main_content(generator.generate_one(null, "fm-create-folder"))
+    );
 }
 function fm_get_file(file) {
  // alert("todo get.file " + file);
@@ -337,10 +258,6 @@ function fm_get_file(file) {
   }
   switch (ext)
   {
-    case "pdf":
-      //create_pdf_view(elem, command);
-      fm.open_file(file);
-      break;
     case "mp3":
       create_mp3_player(elem, command);
       break;
@@ -383,9 +300,16 @@ function fm_recreate_stack(max) {
   return folder;
 }
 function fm_refresh() {
-  fm.state.current = fm.state.navigator;
-  var folder =  (fm.stack.length > 0) ?fm_recreate_stack(fm.stack.length - 1) : "root";
-  init_document(folder);
+  try {
+    fm.state.current = fm.state.navigator;
+    var folder = (fm.stack.length > 0) ? fm_recreate_stack(fm.stack.length - 1) : "root";
+    //folder = encodeURI(folder);
+    //alert('refresh:' + folder);
+
+    init_document(folder);
+  } catch (err) {
+    alert('error refresh ' + err);
+  }
 }
 function fm_prevent_events(e) {
   if (typeof e.preventDefault === 'function') {
@@ -502,7 +426,9 @@ function init_document(folder) {
     folder = fm.set_folder(folder);
     make_breadcrumbs();
 
-    load_async_json("get.folder?folder=" + folder, function (data) {
+    fm.reset_video();
+
+    load_async_json("get.folder?folder=" + folder + "&tm=" +(new Date).getTime(), function (data) {
 
       if (data.length === 0) {
         return fm_set_main_content(generator.generate_one(decodeURIComponent(folder), "fm-empty-folder", null));
@@ -520,6 +446,9 @@ function init_document(folder) {
         if (ext == "jpg") {
           img.reg(filename);
         }
+        else if (ext === "mp4" || ext==="mov") {
+          fm.videos.push(filename);
+        }
       });
       html += generator.generate_one(null, "fm-list-footer");
       fm.get_main_content().innerHTML = html;
@@ -531,40 +460,5 @@ function init_document(folder) {
 }
 
 
-function init_document__org(folder) {
-
-  try {
-
-    fm.state.current = fm.state.navigator;
-    folder = fm.set_folder(folder);
-    make_breadcrumbs();
-
-    load_async_json("get.folder?folder=" + folder, function (data) {
-
-      if (data.length === 0) {
-        fm_show_error("This folder is empty<br>" + decodeURIComponent(folder));
-        return;
-      }
-      data.sort(function (a, b) { return b.d - a.d; });
-
-      img.reset(fm.join_path());
-      var html = "";
-
-      fm.foreach(data, function (item, i) {
-
-        html += generator.generate_one(item, (item.d ? "fm-folder-row" : "fm-file-row"), i);
-        var filename = encodeURI(item.name);
-        var ext = get_file_ext(filename);
-        if (ext == "jpg") {
-          img.reg(filename);
-        }
-      });
-      fm.get_main_content().innerHTML = html;
-    });
-  }
-  catch (err) {
-    alert(err);
-  }
-}
 
 

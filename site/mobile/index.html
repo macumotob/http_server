@@ -4,6 +4,11 @@
   <title></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="HandheldFriendly" content="true">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  <meta http-equiv="pragma" content="no-cache">
+
+ 
 <!--
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
   <script src="https//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -27,26 +32,27 @@
   });
 
 </script>
+
 </head>
 
 <body onclick="fm_on_click();" onselectstart="return false;">
   <div class="container">
-<table class="table">
-<tr>
-  <td>maxbuk.com</td>
-  <td onclick="init_document('root');">Home</td>
-  <td onclick="fm_refresh();">Refresh</td>
-</tr>
-<tr>
-  <td class="text-primary" onclick="init_document('..');"><b>&lt;</b></td>
-  <td class="text-primary" onclick="make_popup();" id="breadcrumb">Path</td>
-  <td class="text-primary" onclick="create_upload_form();">Upload</td>
-  <td class="text-primary" onclick="create_folder_form()">Create</td>
-</tr>
-</table>
+    <table class="table">
+      <tr>
+        <td>maxbuk.com</td>
+        <td onclick="init_document('root');">Home</td>
+        <td onclick="fm_refresh();">Refresh</td>
+      </tr>
+      <tr>
+        <td class="text-primary" onclick="init_document('..');"><b>&lt;</b></td>
+        <td class="text-primary" onclick="make_popup();" id="breadcrumb">Path</td>
+        <td class="text-primary" onclick="create_upload_form();">Upload</td>
+        <td class="text-primary" onclick="create_folder_form()">Create</td>
+      </tr>
+    </table>
+</div>
+<div id="td-path" class="container"></div>
+<div id="fm-main-content" class="container"></div>
 
-    <div id="td-path" class="container"></div>
-    <div id="fm-main-content" class="container"></div>
-  </div>
 </body>
 </html>

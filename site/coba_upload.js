@@ -4,7 +4,7 @@ var COBA_UPLOAD_FILES = [];
 
 function coba_enable_upload()
 {
-
+  fm_set_main_content(generator.generate_one(null,"fm-upload-complete"));
 }
 
 function coba_format_bytes(bytes)
@@ -21,17 +21,24 @@ function coba_create_upload_info(file) {
   var tr = document.createElement("tr");
 
   var td = document.createElement("td");
+  //td.className = "col-xs-1";
   td.innerText = file.name;
   tr.appendChild(td);
+  td.setAttribute("colspan", "2");
+  control.appendChild(tr);
+
+  tr = document.createElement("tr");
 
   td = document.createElement("td");
-  td.style.textAlign = "right";
+  //td.style.textAlign = "right";
   td.innerText = coba_format_bytes(file.size);
+  //td.className = "col-xs-6";
   tr.appendChild(td);
 
   td = document.createElement("td");
-  td.style.textAlign = "right";
+ // td.style.textAlign = "right";
   td.innerText = "0%";
+  //td.className = "col-xs-3";
   tr.appendChild(td);
 
   control.appendChild(tr);
@@ -47,7 +54,7 @@ function coba_upload_part(file, blobs, poss, first, dv)
  // var file_name = join_path(true) + file.name;
   
   var info =
-         "name=" + fm.join_path() + file.name
+         "name=" + encodeURI(fm.join_path() + file.name)
        + "&type=" + file.type
        + "&size=" + (blob ? blob.size : -1)
        + "&filesize=" + file.size
