@@ -126,8 +126,14 @@ var fm = {
 }
 ,open_file: function (file) {
   var link = document.createElement("a");
-  link.href = decodeURI(fm.join_path() + file);
-  link.target = "_blank";
+    // link.href = decodeURI(fm.join_path() + file);
+    //<a href="#" onclick="window.open('MyPDF.pdf', '_blank', 'fullscreen=yes'); return false;">MyPDF</a>
+  link.href = "#";
+  link.onclick = function () {
+      window.open(decodeURI(fm.join_path() + file), '_blank', 'fullscreen=yes');
+      return false;
+  }
+  //link.target = "_blank";
   link.click();
 }
 , videos : []
@@ -247,7 +253,7 @@ function create_folder_form() {
 function fm_get_file(file) {
  // alert("todo get.file " + file);
   var elem = fm.get_main_content();
-  elem.innerHTML = "";
+  //elem.innerHTML = "";
   var ext = get_file_ext(decodeURI(file));
   var command = "get.file?file=" + fm.join_path() + file;
   var x = decodeURI(command);
@@ -446,7 +452,7 @@ function init_document(folder) {
         if (ext == "jpg") {
           img.reg(filename);
         }
-        else if (ext === "mp4" || ext==="mov") {
+        else if (ext === "mp4" || ext==="mov" || ext === "3gp") {
           fm.videos.push(filename);
         }
       });

@@ -91,7 +91,7 @@ function path_convert(folder) {
 var public_folders;
 
 function load_public_folders() {
-  var fileName = "site/mobile/data/folders.json";
+  var fileName = "site/data/folders.json";
   fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
     if (err) {
       console.log("error in load_public_folders" + err);
@@ -106,7 +106,7 @@ function load_public_folders() {
 }
 
 function redirect(callback) {
-  var fileName = "/mobile/data/folders.json";
+  var fileName = "/data/folders.json";
   fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
     if (err) {
       console.log("error in redirect" + err);
@@ -207,12 +207,12 @@ function send_file_part(req, res, file, x) {
     //if(x.winphone){
     "Access-Control-Allow-Origin": "*",
     "TransferMode.DLNA.ORG": "Streaming",
-    "File-Size": chunksize,
-
+    "File-Size": total,
+    "Connection" : "keep-alive",
     "Content-Range": "bytes " + start + "-" + end + "/" + total,
     "Accept-Ranges": "bytes",
-    "Content-Length": chunksize
- //   "Content-Type": "video/mp4"
+    "Content-Length": chunksize,
+    "Content-Type": "video/mp4"
   });
 
   var stream = fs.createReadStream(file, options)
@@ -232,7 +232,7 @@ function send_file_part(req, res, file, x) {
 function send_file_quicktime(req, res, file, x) {
 
   console.log("QT :" + file);
-  var maxchunk = 64 * 1024;
+  var maxchunk = 64 * 1024 * 2;
 
   var stats = fs.statSync(file);
   var total = stats["size"];
@@ -318,7 +318,7 @@ function send_file(response,filename,is_mobile) {
     }
 
     if (fs.statSync(filename).isDirectory()) {
-      filename += (is_mobile ? '/mobile/index.html': '/index.html');
+        filename += (is_mobile ? '/mobile/index.html' : '/index.html');
     }
    
     var stats = fs.statSync(filename);
@@ -458,82 +458,82 @@ function check_redirect(req) {
 
 http.createServer(function(req, res) {
 
-  try {
-   var x = check_redirect(req);
+    try {
+        var x = check_redirect(req);
 
-//    console.log("url:" +decodeURIComponent(req.url));
-  //  var uri = decodeURIComponent(url.parse(request.url).pathname)
- //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
-  
-    var query= decodeURIComponent(req.url);
-    var ua = req.headers['user-agent'];
-    var quicktime = ua.indexOf("QuickTime") >= 0;
-    console.log("agent:" + ua);
-    console.log("range:" + x.range + " quick:" + quicktime);
-    console.log(req.headers);
-  //  var is_mobile = /phone|iphone/i.test(ua);
+        //    console.log("url:" +decodeURIComponent(req.url));
+        //  var uri = decodeURIComponent(url.parse(request.url).pathname)
+        //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
 
-    switch (x.func) {
-      case "get.folder":
-        return send_folder_content(res, x.prms.folder);
+        var query = decodeURIComponent(req.url);
+        var ua = req.headers['user-agent'];
+        var quicktime = ua.indexOf("QuickTime") >= 0;
+        console.log("agent:" + ua);
+        console.log("range:" + x.range + " quick:" + quicktime);
+        console.log(req.headers);
+        //  var is_mobile = /phone|iphone/i.test(ua);
 
-      case "get.file":
-        if (quicktime) {
-          return send_file_quicktime(req, res, x.prms.file, x);
+        switch (x.func) {
+            case "get.folder":
+                return send_folder_content(res, x.prms.folder);
+
+            case "get.file":
+                if (quicktime) {
+                    return send_file_quicktime(req, res, x.prms.file, x);
+                }
+                if (x.range || x.winphone) {
+                    //  console.log(x.prms.file);
+                    return send_file_part(req, res, x.prms.file, x);
+                }
+                return send_file(res, x.prms.file, x.mobile);
+            case "get.maket":
+                // console.log(wfolder + x.prms.name);
+                mk.parse(wfolder + x.prms.name, function (data) { send_json(res, data); });
+                return;
+            case "mkdir":
+                return fm_create_folder(res, x.prms.folder, x.prms.name);
+
+            default:
+                break;
         }
-        if (x.range || x.winphone) {
-         //  console.log(x.prms.file);
-           return send_file_part(req, res, x.prms.file,x);
-          }
-         return send_file(res, x.prms.file, x.mobile);
-      case "get.maket":
-       // console.log(wfolder + x.prms.name);
-        mk.parse(wfolder + x.prms.name, function (data) { send_json(res,data);});
-        return;
-      case "mkdir":
-        return fm_create_folder(res, x.prms.folder, x.prms.name);
-       
-      default:
-        break;
+
+        if (x.func === "/") {
+
+            if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
+                var action = req.headers['baybak-action'];
+                var info = req.headers['coba-file-info'];
+                var ctype = req.headers['content-type'];
+                if (ctype) {
+                    //console.log('type   :' + ctype);
+                }
+                if (action) {
+                    //console.log("action : " + action);
+                }
+                if (info) {
+                    // console.log("upload info:" + info);
+                    var qs = require("querystring");
+                    var prms = qs.parse(info);
+                    upload_file(req, res, prms);
+                }
+                return;
+            }
+            //  send_file(res, x.file, x.mobile);
+            //  return;
+            if (quicktime) {
+                return send_file_quicktime(req, res, x.file, x);
+            }
+            if (x.range || x.winphone === "1") {
+                return send_file_part(req, res, x.file, x);
+            }
+
+            return send_file(res, x.file, x.mobile);
+
+
+        }
     }
-
-    if (x.func === "/") {
-
-      if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
-        var action = req.headers['baybak-action'];
-        var info = req.headers['coba-file-info'];
-        var ctype = req.headers['content-type'];
-        if (ctype) {
-          //console.log('type   :' + ctype);
-        }
-        if (action) {
-          //console.log("action : " + action);
-        }
-        if (info) {
-         // console.log("upload info:" + info);
-          var qs = require("querystring");
-          var prms = qs.parse(info);
-          upload_file(req, res,prms);
-        }
-        return;
-      }
-    //  send_file(res, x.file, x.mobile);
-      //  return;
-      if (quicktime) {
-        send_file_quicktime(req, res, x.file, x);
-      }
-      else if (x.range || x.winphone === "1") {
-          send_file_part(req, res, x.file, x);
-          }
-          else {
-           send_file(res, x.file,x.mobile);
-         }
-        return;
+    catch (err) {
+        error_handler(res, err);
     }
-  }
-  catch (err) {
-    error_handler(res, err);
-  }
 }).listen(port,host);
 
 
@@ -541,22 +541,29 @@ function register_server() {
 
   var http = require('http');
 
-  //http://maxbuk.com/regsrv.php?name=waswas_lenovo&port=3030
+    //http://maxbuk.com/regsrv.php?name=waswas_lenovo&port=3030
+    //Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36
   var options = {
     host: 'www.maxbuk.com',
-    path: '/regsrv.php?name=waswas_lenovo&port=3030'// + port
+    path: '/regsrv.php?name=waswas_lenovo&port=3030', // + port
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+        'Accept' : '*/*'
+    }
   };
 
   callback = function(response) {
     var str = '';
 
     response.on('data', function (chunk) {
-      str += chunk;
+        str += chunk;
+
     });
 
     response.on('end', function () {
       console.log(str);
       console.log(".........................................");
+      console.log(response.headers);
     });
   }
 
@@ -574,3 +581,19 @@ console.log("host : " + os.hostname() + "\nfolder:" + wfolder);
 
 console.log("Static file server running at http://"
     + host + ":" + port + "/\nCTRL + C to shutdown");
+
+
+var os = require('os');
+
+var interfaces = os.networkInterfaces();
+var addresses = [];
+for (var k in interfaces) {
+    for (var k2 in interfaces[k]) {
+        var address = interfaces[k][k2];
+        if (address.family === 'IPv4' && !address.internal) {
+            addresses.push(address.address);
+        }
+    }
+}
+
+console.log(addresses);
