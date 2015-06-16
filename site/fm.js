@@ -126,15 +126,20 @@ var fm = {
 }
 ,open_file: function (file) {
   var link = document.createElement("a");
-    // link.href = decodeURI(fm.join_path() + file);
+  link.href = decodeURI(fm.join_path() + file);
     //<a href="#" onclick="window.open('MyPDF.pdf', '_blank', 'fullscreen=yes'); return false;">MyPDF</a>
-  link.href = "#";
-  link.onclick = function () {
-      window.open(decodeURI(fm.join_path() + file), '_blank', 'fullscreen=yes');
-      return false;
-  }
-  //link.target = "_blank";
+  link.target = "_blank";
   link.click();
+}
+,download_file: function (file) {
+
+  var link = document.createElement("a");
+  link.download = decodeURI(file);
+  link.href = decodeURIComponent(fm.join_path() + file);
+  link.target = "_blank";
+  // alert(link.href);
+  link.click();
+  fm_refresh();
 }
 , videos : []
 , video_index: 0
@@ -191,19 +196,19 @@ function get_file_ext(file) {
   }
   return ext.toLowerCase();
 }
-function fm_format(bytes) {
-  var s = "" + bytes, t="";
-  var i = s.length - 1, count = 1;
+//function fm_format(bytes) {
+//  var s = "" + bytes, t="";
+//  var i = s.length - 1, count = 1;
 
-  while (i >= 0) {
-    t = s[i] + t;
-    if (i > 0 && (t.length == 3 || t.length == 7 || t.length == 11)) {
-      t = '.' + t;
-    }
-    i--;
-  }
-  return t;
-}
+//  while (i >= 0) {
+//    t = s[i] + t;
+//    if (i > 0 && (t.length == 3 || t.length == 7 || t.length == 11)) {
+//      t = '.' + t;
+//    }
+//    i--;
+//  }
+//  return t;
+//}
 function create_mp3_player(parent, filename) {
  // alert(filename);
   var audio = document.createElement('audio');
@@ -286,15 +291,6 @@ function fm_get_file(file) {
       break;
   }
   
-}
-function fm_downlod_file(file){
-  var link = document.createElement("a");
-  link.download = decodeURI(file);
-  link.href = decodeURIComponent(fm.join_path() + file);
-  link.target = "_blank";
-// alert(link.href);
-  link.click();
-  fm_refresh();
 }
 function fm_recreate_stack(max) {
   var new_stack = [];
@@ -427,6 +423,7 @@ function fm_on_click(e) {
 function init_document(folder) {
 
   try {
+    history.pushState(null, null, '/');
 
     fm.state.current = fm.state.navigator;
     folder = fm.set_folder(folder);

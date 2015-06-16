@@ -30,12 +30,17 @@
           });
     })
   });
-
+  history.pushState(null, null, 'index');
+  window.addEventListener('popstate', function (event) {
+    event.returnValue = false;
+    event.preventDefault();
+    init_document("..");
+  });
 </script>
 
 </head>
 
-<body onclick="fm_on_click();" onselectstart="return false;">
+<body onclick="fm_on_click();" onselectstart="return false;" >
   <div class="container">
     <table class="table">
       <tr>

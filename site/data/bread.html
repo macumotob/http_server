@@ -7,10 +7,10 @@
 
     <p style="font-size:xx-small;">
       <div class="row">
-        <div class="col-xs-3">{{fm_format(item.size)}}</div>
+        <div class="col-xs-3">{{coba_format_bytes(item.size)}}</div>
         <div class="col-xs-3 text-success text-center" data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">view</div>
         <div class="col-xs-3 text-primary text-center" 
-             data-method="fm_downlod_file" data-args="{{encodeURI(item.name)}}">download</div>
+             data-method="fm.download_file" data-args="{{encodeURI(item.name)}}">download</div>
         <div class="col-xs-3 text-primary text-center"
              data-method="fm_delete_file" 
              data-args="{{encodeURI(item.name)}}"><b>{{get_file_ext(item.name)}}</b></div>
@@ -41,11 +41,11 @@
 <p><b>{{item.name}}</b></p>
       <div class="row">
         <div class="col-xs-3">{{get_file_ext(item.name)}}</div>
-        <div class="col-xs-3">{{fm_format(item.size)}}</div>
+        <div class="col-xs-3">{{coba_format_bytes(item.size)}}</div>
         <div class="col-xs-3 text-success text-center" 
              data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">view</div>
         <div class="col-xs-3 text-primary text-center"
-             data-method="fm_downlod_file" data-args="{{encodeURI(item.name)}}">download</div>
+             data-method="fm.download_file" data-args="{{encodeURI(item.name)}}">download</div>
       </div>
 
 </td>
