@@ -31,9 +31,9 @@
   };
   this.sort = function () {
     this.files.sort(function (a, b) {
-      if (a.name < b.name)
+      if (a.name.toLowerCase() < b.name.toLowerCase())
         return -1;
-      if (a.name > b.name)
+      if (a.name.toLowerCase() > b.name.toLowerCase())
         return 1;
       return 0;
     });
@@ -205,29 +205,6 @@ var fm = {
   link.click();
   //  fm_refresh();
 }
-//, videos: []
-//, video_index: 0
-//, degree: 0
-//, reset_video: function () {
-//  this.videos = [];
-//  this.video_index = 0;
-//}
-//, video_rotate: function () {
-//  this.degree += 10;
-//  var el = id("#video");//.className = "rot";
-//}
-//, play: function (index) {
-
-//  id("#tr" + this.video_index).className = "text-default";
-
-//  var file = this.videos[parseInt(index)];
-//  var src = "get.file?file=" + fm.join_path() + file;
-//  var el = id("#video");
-//  el.src = src;
-//  el.play();
-//  id("#tr" + index).className = "text-primary";
-//  this.video_index = index;
-//}
 , refresh_current: function () {
 
   switch (this.state.current) {
@@ -258,7 +235,15 @@ var fm = {
   this.stack = new_stack;
   return folder;
 }
-
+, show_ext_menu: function () {
+  fm_set_main_content(generator.generate_one(null,"fm-ext-menu",null));
+}
+  , show_servers: function () {
+    load_async_json("http://www.maxbuk.com/srvlist.php", function (data) {
+      alert(data);
+    });
+    //
+  }
 };
 
 

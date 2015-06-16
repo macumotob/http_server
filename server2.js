@@ -545,19 +545,71 @@ function register_server() {
     //Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36
   var options = {
     host: 'www.maxbuk.com',
-    path: '/regsrv.php?name=waswas_lenovo&port=3030', // + port
+    path: '/regsrv.php?name=WASWAS HOME&port=3035', // + port
     headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
-        'Accept' : '*/*'
+      'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+      'Accept': '*/*',
+      "Host": "xyz.com:8000",
+      "Accept": "*/*",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Accept-Encoding": "gzip, deflate",
+      "DNT": "1",
+      "Referer": "http://localhost:8000/test/",
+      "Origin": "http://localhost:8000",
+      "Connection": "keep-alive",
+      "Pragma": "no-cache",
+      "Cache-Control": "no-cache",
+      "Content-Length": 0
     }
   };
 
   callback = function(response) {
     var str = '';
+    response.header("Content-Type", "application/json; charset=utf-8");
+    response.on('data', function (chunk) {
+       // str += encodeURI(chunk);
+    });
+
+    response.on('end', function () {
+      console.log(str);
+      console.log(".........................................");
+      console.log(response.headers);
+    });
+  }
+
+  http.request(options, callback).end();
+}
+function load_registered_servers() {
+
+  var http = require('http');
+
+  //http://maxbuk.com/regsrv.php?name=waswas_lenovo&port=3030
+  //Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36
+  var options = {
+    host: 'www.maxbuk.com',
+    path: '/srvlist.php', // + port
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
+      'Accept': '*/*',
+      "Host": "xyz.com:8000",
+      "Accept": "*/*",
+      "Accept-Language": "en-US,en;q=0.5",
+      "Accept-Encoding": "gzip, deflate",
+      "DNT": "1",
+      "Referer": "http://localhost:8000/test/",
+      "Origin": "http://localhost:8000",
+      "Connection": "keep-alive",
+      "Pragma": "no-cache",
+      "Cache-Control": "no-cache",
+      "Content-Length": 0
+    }
+  };
+
+  callback = function (response) {
+    var str = '';
 
     response.on('data', function (chunk) {
-        str += chunk;
-
+      str += chunk;
     });
 
     response.on('end', function () {
@@ -570,7 +622,10 @@ function register_server() {
   http.request(options, callback).end();
 }
 
-//register_server();
+
+
+
+
 load_public_folders();
 
 process.chdir(wdir);
@@ -597,3 +652,5 @@ for (var k in interfaces) {
 }
 
 console.log(addresses);
+//load_registered_servers();
+//register_server();
