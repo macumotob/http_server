@@ -15,18 +15,18 @@
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 -->
-  <link rel="stylesheet" href="bootstrap.min.css" />
-  <script type="text/javascript" src="loader.js"></script>
+  <link rel="stylesheet" href="css/bootstrap.min.css" />
+  <script type="text/javascript" src="js/loader.js"></script>
 
 <script type="text/javascript">
   function fm_can_goback() {
     return  (fm.can_goback() ? "true" : "false");
   }
-  load_script("generator.js", function () {
+  load_script("js/generator.js", function () {
     generator.load(function () {
-          load_script("fm.js", function () {
+          load_script("js/fm.js", function () {
             init_document("root");
-            load_script("coba_upload.js", function () { });
+            load_script("js/coba_upload.js", function () { });
           });
     })
   });

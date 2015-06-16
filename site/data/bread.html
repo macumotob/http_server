@@ -135,15 +135,30 @@
 <p> <b data-method="create_upload_form">Upload More files</b></p>
 </div>
 <!--#fm-video-header-->
+
+{{* fm.video.sort();}}
 <div id="rot">
-{{*//var src='get.file?file=' + fm.join_path() + item[0];alert(src);}}
-  <video id="video" width="320px" height="240px" preload="auto"
-         src="{{'get.file?file=' + fm.join_path() + item[0]}}" controls="true"></video>
+ <video id="video" width="320px" height="240px" preload="auto"  src="" controls="controls" onended="fm.video.next();"></video>
 </div>
-<div class="container pre-scrollable">
+<div class="pre-scrollable">
   <table class="table">
     <!--#fm-video-body-->
-    <tr id="tr{{index}}" data-method="fm.play" data-args="{{index}}"><td>{{index}}</td><td>{{item}}</td></tr>
+    <tr id="tr{{index}}" data-method="fm.video.play" data-args="{{index}}"><td>{{(index+1)}}</td><td>{{item.name}}</td>
+      <td class="text-right">{{coba_format_bytes(item.size)}}</td>
+    </tr>
     <!--#fm-video-footer-->
+  </table>
+</div>
+<!--#fm-audio-header-->
+{{* fm.audio.sort();}}
+<div id="rot">
+  <audio id="audio" src="" controls="controls" onended="fm.audio.next();" ></audio>
+</div>
+<div class="pre-scrollable">
+  <table class="table">
+    <!--#fm-audio-body-->
+    <tr id="tr{{index}}" data-method="fm.audio.play" data-args="{{index}}"><td>{{(index+1)}}</td><td>{{item.name}}</td>
+      <td class="text-right">{{coba_format_bytes(item.size)}}</td></tr>
+    <!--#fm-audio-footer-->
   </table>
 </div>

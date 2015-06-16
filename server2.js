@@ -105,22 +105,22 @@ function load_public_folders() {
   });
 }
 
-function redirect(callback) {
-  var fileName = "/data/folders.json";
-  fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
-    if (err) {
-      console.log("error in redirect" + err);
-      return;
-    }
-  //    throw err;
+//function redirect(callback) {
+//  var fileName = "/data/folders.json";
+//  fs.readFile(fileName, { encoding: 'utf-8' }, function (err, data) {
+//    if (err) {
+//      console.log("error in redirect" + err);
+//      return;
+//    }
+//  //    throw err;
 
-    if (data) {
-      var arr = eval("arr=" + data);
-      callback(arr);
-      return;
-    }
-  });
-}
+//    if (data) {
+//      var arr = eval("arr=" + data);
+//      callback(arr);
+//      return;
+//    }
+//  });
+//}
 /*
 function send_registered_folders(response,folders) {
 
@@ -173,6 +173,21 @@ function fm_create_folder(res, folder, name) {
     send_json(res, {result: 0, msg: e.toString() });
   }
 }
+
+function fm_send(res,file,options) {
+  var stream = fs.createReadStream(file, options)
+  .on('data', function (chunk) {
+    res.write(chunk);
+  })
+  .on('error', function (err) {
+    console.log("error :" + err);
+    res.end();
+  })
+  .on('end', function () {
+    res.end();
+  }).read();
+
+}
 function send_file_part(req, res, file, x) {
 
   var maxchunk = 64 * 1024;
@@ -189,10 +204,21 @@ function send_file_part(req, res, file, x) {
       end = total - 1;
     }
   }
-  var chunksize = (end - start) + 1
+  if (end < start) {
+    res.writeHead(416, {
+      "Content-Range": "bytes */"+ total
+    });
+    res.end();
+    console.log("Invalide range :" + (end - start));
+    return;
+  }
 
- // console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
-//  console.log("total: " + total + " " + file);
+  var chunksize = (end - start) + 1
+  //if (chunksize > maxchunk) {
+  //  //chunksize = maxchunk;
+  //}
+  //console.log("start:" + start + " end:" + end + " chunk:" + chunksize);
+  //console.log("total: " + total + " " + file);
 
   var options = {
     'flags': 'r'
@@ -211,28 +237,17 @@ function send_file_part(req, res, file, x) {
     "Connection" : "keep-alive",
     "Content-Range": "bytes " + start + "-" + end + "/" + total,
     "Accept-Ranges": "bytes",
-    "Content-Length": chunksize,
-    "Content-Type": "video/mp4"
+    "Content-Length": chunksize
+   // "Content-Type": "video/mp4"
   });
 
-  var stream = fs.createReadStream(file, options)
-  .on('data', function (chunk) {
-    res.write(chunk);
-  })
-  .on('error', function (err) {
-    console.log("error :" + err);
-    res.end();
-  })
-  .on('end', function () {
-    res.end();
-   // console.log("end...:" + file);
-  }).read();
+  fm_send(res,file, options);
 
 }
 function send_file_quicktime(req, res, file, x) {
 
   console.log("QT :" + file);
-  var maxchunk = 64 * 1024 * 2;
+  var maxchunk = 1024 * 64;
 
   var stats = fs.statSync(file);
   var total = stats["size"];
@@ -251,9 +266,9 @@ function send_file_quicktime(req, res, file, x) {
     start = 0; end = total - 1;
   }
   var chunksize = (end - start) + 1
-
+  console.log("total: " + total + " range:" + x.range);
   console.log("QT start:" + start + " end:" + end + " chunk:" + chunksize);
-  //  console.log("total: " + total + " " + file);
+  
 
   var options = {
     'flags': 'r'
@@ -274,23 +289,8 @@ function send_file_quicktime(req, res, file, x) {
     "Content-Length": chunksize,
     "Content-Type": "video/mp4"
   });
-  //if (chunksize === 2) {
-  //  res.write("\0\0");
-  //  res.end();
-  //  return;
-  //}
-  var stream = fs.createReadStream(file, options)
-  .on('data', function (chunk) {
-    res.write(chunk);
-  })
-  .on('error', function (err) {
-    console.log("error :" + err);
-    res.end();
-  })
-  .on('end', function () {
-    res.end();
-    // console.log("end...:" + file);
-  }).read();
+
+  fm_send(res, file, options);
 
 }
 
@@ -468,9 +468,9 @@ http.createServer(function(req, res) {
         var query = decodeURIComponent(req.url);
         var ua = req.headers['user-agent'];
         var quicktime = ua.indexOf("QuickTime") >= 0;
-        console.log("agent:" + ua);
-        console.log("range:" + x.range + " quick:" + quicktime);
-        console.log(req.headers);
+      //  console.log("agent:" + ua);
+      //  console.log("range:" + x.range + " quick:" + quicktime);
+      //  console.log(req.headers);
         //  var is_mobile = /phone|iphone/i.test(ua);
 
         switch (x.func) {

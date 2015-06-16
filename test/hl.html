@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>images test</title>
+<script type="text/javascript" src="hl.js"></script>
+
+</head>
+<body>
+  <button onclick="hl_format();">format</button>
+ <div  class="container">
+   <textarea id="demo" style="display:block;width:500px;height:300px;float:left">
+       parse: function (s, lineno) {
+    var word = "", words = [];
+    var i = 0, count = s.length;
+    while (i < count) {
+      var c = s[i];
+      if (this.isterm(c)) {
+        if (word.length > 0) {
+          this.on_token({ token: this.tokens.word, value: word });
+          word = "";
+        }
+        this.on_token({ token: this.tokens.term, value: (c === ' ' ? "&nbsp;" : c) });
+      }
+      else {
+        word += c;
+      }
+      i++;
+    }
+  },
+  parse2: function (s, lineno) {
+    var self = this;
+    var word = "", words = [];
+    this.foreach(s, function (c, i) {
+      if (self.isterm(c)) {
+        if (word.length > 0) {
+          self.on_token({ token: self.tokens.word, value: word });
+          word = "";
+        }
+        self.on_token({ token: self.tokens.term, value: c });
+      }
+      else {
+        word += c;
+      }
+    });
+    return words;
+  },
+  </textarea>
+ </div>
+
+<div id="test" style="width:500px;height:300px;border:1px solid silver;overflow:scroll;">
+</div>
+
+    
+</body>
+</html>
