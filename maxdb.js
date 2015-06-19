@@ -13,7 +13,7 @@ var cnn = mysql.createConnection({
 cnn.connect();
 
 function json_result() {
-  return { result: true, msg: null };
+  return { result: true, msg: null , text:null};
 }
 
 
@@ -24,17 +24,17 @@ function exec(sql,prms,cb) {
     cnn.query(sql,prms, function (err, results) {
       if (err) {
         x.msg = err;
-        x.msg.text = sql + " prms:" + JSON.stringify(prms);
+        x.text = sql + " prms:" + JSON.stringify(prms);
         x.result = false;
       }
       else {
-        x.msg = results;
+        x.msg = results[0];
       }
       cb(JSON.stringify(x));
     });
   } catch (err) {
     x.msg = err;
-    x.msg.text = sql + " prms:" + JSON.stringify(prms);
+    x.text = sql + " prms:" + JSON.stringify(prms);
     x.result = false;
     cb(JSON.stringify(x));
   }
@@ -47,7 +47,7 @@ exports.get_servers = function (cb) {
     cnn.query("select * , DATE_FORMAT( regtime,  '%d-%M-%Y %h:%m:%s' ) AS dt from mb_servers", function (err, results) {
       if (err) {
         x.msg = err;
-        x.msg.text = "Error select from mb_servers . table not exists";
+        x.text = "Error select from mb_servers . table not exists";
         x.result = false;
       }
       else {
@@ -59,7 +59,7 @@ exports.get_servers = function (cb) {
   } catch (err) {
     console.log(err);
     x.msg = err;
-    x.msg.text = "Error select from mb_servers . table not exists";
+    x.text = "Error select from mb_servers . table not exists";
     x.result = false;
     cb(JSON.stringify(x));
   }
@@ -73,7 +73,8 @@ exports.links_get = function (offset, count, cb) {
 exports.notes_get = function (offset, count, cb) {
   offset = parseInt(offset);
   count = parseInt(count);
-  exec("select id,txt , DATE_FORMAT( ldt,  '%d-%M-%Y %h:%m:%s' ) AS data  from diary order by ldt desc  limit ?,?", [offset, count], cb);
+  exec("call diary_get_page(?,?)", [offset, count], cb);
+  //exec("select id,txt , DATE_FORMAT( ldt,  '%d-%M-%Y %h:%m:%s' ) AS data  from diary order by ldt desc  limit ?,?", [offset, count], cb);
 }
 exports.notes_note = function (id,cb) {
   cnn.query("select id,txt , DATE_FORMAT( ldt,  '%d-%M-%Y %h:%m:%s' ) AS data  from diary where id=?",[id], function (err, results) {
