@@ -78,6 +78,8 @@ var generator = {
   var m = this.makets[maket_name];
   var maket = this.makets[maket_name].p;
   var html = "";
+
+  if (!data) return;
   var n = 0, max = data.length;
 
   while (n < max) {
@@ -87,5 +89,9 @@ var generator = {
   }
   return html;
 }
-
+, gen: function (data, maket) {
+  return this.generate_one(data, "fm-" + maket + "-header", 0)
+    + this.generate(data, "fm-" + maket + "-body", 0)
+    + this.generate_one(data, "fm-" + maket + "-footer", 0);
+}
 };

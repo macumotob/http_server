@@ -162,10 +162,117 @@
     <!--#fm-audio-footer-->
   </table>
 </div>
+
 <!--#fm-ext-menu-->
-<div class="container">
-  
- <p class="text-primary">
-      <a href="http://www.maxbuk.com" target="_blank">  Сайт maxbuk.com </a></p>
-  <p class="text-primary" data-method="fm.show_servers">Список серверов на maxbuk.com</p>
+
+<table class="table">
+  <tr data-method="fm.show_notes"><td class="text-primary">Заметки</td></tr>
+  <tr data-method="fm.links.show"><td class="text-primary">Полезные ссылки</td></tr>
+  <tr data-method="fm.show_servers"><td class="text-primary">Список серверов на www.maxbuk.com</td></tr>
+  <tr data-method="fm.open_site" data-args="www.maxbuk.com"><td class="text-primary">Сайт www.maxbuk.com</td></tr>
+</table>
+<!--#fm-servers-header-->
+<!--#fm-servers-body-->
+<div class="panel panel-default" id="tr{{index}}">
+  <div class="panel-heading">{{(index+1)}}. <b class="text-primary">{{item.name}}</b></div>
+  <div class="panel-body">
+
+    <span>{{item.ip}}</span>     {{item.port}} {{item.dt}}
+
+  </div>
+</div>
+<!--#fm-servers-footer-->
+
+<!--#fm-notes-header-->
+ 
+<ul class="pager">
+  <li class="previous"><a href="#" data-method="fm.show_notes_offset" data-args="-10">Prev</a></li>
+  <li><a href="#" data-method="fm.show_add_note">Add</a></li>
+  <li class="text-danger" id="notes-info">...</li>
+  <li class="next"><a href="#" data-method="fm.show_notes_offset" data-args="10">Next</a></li>
+</ul>
+<!--#fm-notes-body-->
+<div class="panel panel-default" id="tr{{index}}">
+  <div class="panel-heading" data-method="fm.show_edit_note" data-args="{{item.id}}">{{(index+1+fm.offset)}}. <b class="text-primary">{{item.data}}</b> {{item.id}}</div>
+  <div class="panel-body">
+    {{item.txt}}
+  </div>
+</div>
+
+<!--#fm-notes-footer-->   
+<ul class="pager">
+  <li class="previous"><a href="#" data-method="fm.show_notes_offset" data-args="-10">Prev</a></li>
+  <li><a href="#" data-method="fm.show_add_note">Add</a></li>
+  <li class="text-danger" id="notes-info">...</li>
+  <li class="next"><a href="#" data-method="fm.show_notes_offset" data-args="10">Next</a></li>
+</ul>
+
+
+<!--#fm-add-note-header-->
+<div class="panel panel-primary">
+  <div class="panel-heading">Add new note</div>
+  <div class="panel-body">
+    <form role="form">
+      <div class="form-group">
+        <label for="comment">Comment:</label>
+        <textarea class="form-control" rows="5" id="txt"></textarea>
+      </div>
+      <button type="button" class="btn btn-default" data-method="fm.show_notes">Cancel</button>
+      <button type="button" class="btn btn-primary"
+              data-method="fm.save_new_note">&nbsp; Save &nbsp;</button>
+    </form>
+</div>
+  <div class="panel-footer">
+  </div>
+</div>
+
+<!--#fm-add-note-body-->
+<!--#fm-add-note-footer-->
+
+<!--#fm-edit-note-header-->
+<div class="panel panel-primary">
+  <div class="panel-heading">Edit {{item.id}} date:{{item.data}}</div>
+  <div class="panel-body">
+    <form role="form">
+      <div class="form-group">
+        <label for="comment">Comment:</label>
+        <textarea class="form-control" rows="5" id="txt" >{{item.txt}}</textarea>
+      </div>
+      <button type="button" class="btn btn-danger"
+              data-method="fm.delete_note" data-args="{{item.id}}">Delete
+      </button>
+      <button type="button" class="btn btn-default" data-method="fm.show_notes">Cancel</button>
+      <button type="button" class="btn btn-primary"
+              data-method="fm.update_note" data-args="{{item.id}}">
+        &nbsp; Save &nbsp;
+      </button>
+    </form>
+  </div>
+  <div class="panel-footer">
+  </div>
+</div>
+
+<!--#fm-edit-note-body-->
+<!--#fm-edit-note-footer-->
+
+<!--#fm-mysql-error-->
+
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Ошибка на сервере SQL</h4>
+      </div>
+      <div class="modal-body">
+        <p>Код ошибки {{item.code}}  #<b>{{item.errno}}</b>.</p>
+        <p class="text-danger">{{item.text}}.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
 </div>

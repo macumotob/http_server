@@ -135,22 +135,23 @@ var fm = {
     unknown: 0,
     video: 1,
     audio: 2,
-    document : 3,
-    image : 4
+    document: 3,
+    image: 4
   }
 , audio: new fm_viewer("audio")
-, video : new fm_viewer("video")
+, video: new fm_viewer("video")
+, links: new fm_table("links")
 , get_file_type: function (ext) {
-  if("pdf;doc;mobi;fb2;txt;epub;rtf;doc;".indexOf(ext + ';') >= 0) return this.file_type.document;
-  if("mp4;mov;3gp;ogg;avi;mkv;vob;".indexOf(ext + ';') >= 0) return this.file_type.video;
-  if("jpg;png;".indexOf(ext + ';') >= 0) return this.file_type.image;
+  if ("pdf;doc;mobi;fb2;txt;epub;rtf;doc;".indexOf(ext + ';') >= 0) return this.file_type.document;
+  if ("mp4;mov;3gp;ogg;avi;mkv;vob;".indexOf(ext + ';') >= 0) return this.file_type.video;
+  if ("jpg;png;".indexOf(ext + ';') >= 0) return this.file_type.image;
   if ("mp3;".indexOf(ext + ';') >= 0) return this.file_type.audio;
   return this.file_type.unknown;
 }
 , errors: {
-    create_folder: "specify the folder in which you want to create a subfolder",
-    upload_select_folder: "specify the folder to which you want to upload files"
-  },
+  create_folder: "specify the folder in which you want to create a subfolder",
+  upload_select_folder: "specify the folder to which you want to upload files"
+},
   foreach: function (obj, callback) {
     for (var i = 0, max = obj.length; i < max; i++) {
       var item = obj[i];
@@ -196,6 +197,12 @@ var fm = {
   link.target = "_blank";
   link.click();
 }
+, open_site: function (url) {
+  var link = document.createElement("a");
+  link.href = "http://" + url;
+  link.target = "_blank";
+  link.click();
+}
 , download_file: function (file) {
 
   var link = document.createElement("a");
@@ -236,14 +243,119 @@ var fm = {
   return folder;
 }
 , show_ext_menu: function () {
-  fm_set_main_content(generator.generate_one(null,"fm-ext-menu",null));
+  this.reset_notes();
+  fm_set_main_content(generator.generate_one(null, "fm-ext-menu", null));
 }
-  , show_servers: function () {
-    load_async_json("http://www.maxbuk.com/srvlist.php", function (data) {
-      alert(data);
+, show_servers: function () {
+  var self = this;
+  load_async_json("/get.servers?tm=" + new Date().getTime(), function (data) {
+    if (data.result) {
+      fm_set_main_content(generator.gen(data, "servers"));
+    }
+    else {
+      fm_set_main_content(generator.generate_one(data.msg, "fm-mysql-error"));
+      $("#myModal").modal();
+      self.show_ext_menu();
+    }
+  });
+}
+, offset: 0
+, last_notes: false
+, reset_notes: function () {
+  this.offset = 0;
+  this.last_notes = false;
+}
+, show_notes_offset: function (delta) {
+
+  
+  this.offset += parseInt(delta);
+  if (this.offset < 0) this.offset = 0;
+  this.show_notes();
+}
+, show_notes: function () {
+  var count = 10;
+
+  
+  var self = this;
+  var url = "/notes.get?offset=" + this.offset + "&count=" + count + "&tm="+ new Date().getTime();
+  load_async_json(url, function (data) {
+
+    if (data.result) {
+      var info = id("#notes-info");
+      if (data.msg.length == 0) {
+        if (info) {
+          self.last_notes = true;
+          info.innerHTML = "last records";
+        }
+        return;// self.show_add_note();
+      }
+      fm_set_main_content(generator.gen(data.msg, "notes"));
+      self.last_notes = false;
+      if (info) {
+        info.innerHTML = "records:" + self.offset;
+      }
+    } else {
+      fm_set_main_content(generator.generate_one(data.msg, "fm-mysql-error"));
+      $("#myModal").modal();
+    }
+
+  });
+}
+, delete_note: function (ident) {
+  var self = this;
+  load_async_json("/notes.delete?id=" + ident, function (data) {
+    if (data.result) {
+      self.show_notes();
+    }
+    else {
+      alert(data.msg);
+    }
+    
+  });
+}
+, save_new_note: function (txt) {
+    var elem = id("#txt");
+    if (elem.value.length == 0) {
+      elem.value = "Введите текст...";
+      return;
+    }
+    var self = this;
+    post("note.add?", "txt=" + encodeURI(elem.value), function (data) {
+      if (data.result) {
+        self.show_notes();
+      }
+      else {
+        elem.value = data.msg + "\n\n" +elem.value;
+      }
     });
-    //
-  }
+}
+, show_add_note: function () {
+  fm_set_main_content(generator.gen(null, "add-note"));
+}
+, show_edit_note: function (ident) {
+  var self = this;
+  load_async_json("/notes.note?tm="+ new Date().getTime() + "&id=" + ident, function (data) {
+    if (data.result) {
+      fm_set_main_content(generator.gen(data.msg[0], "edit-note"));
+    }
+    else {
+      alert(data.msg);
+    }
+  });
+}
+, update_note: function (ident) {
+  var elem = id("#txt");
+  var self = this;
+  post("note.update?", "id=" + ident + "&txt=" + encodeURI(elem.value), function (data) {
+    if (data.result) {
+      self.show_notes();
+    }
+    else {
+      elem.value = data.msg + "\n\n" + elem.value;
+    }
+  });
+
+}
 };
 
 
@@ -269,12 +381,6 @@ function create_image_view(parent, filename) {
 }
 
 function create_mp3_player(parent, filename) {
-  // alert(filename);
-  //var audio = document.createElement('audio');
-  //audio.setAttribute('src', filename);
-  //audio.setAttribute('controls', 'controls');
-  //audio.play();
-  //parent.appendChild(audio);
 
  fm_set_main_content(
 generator.generate_one(fm.audio.files, "fm-audio-header", 0)

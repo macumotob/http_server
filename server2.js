@@ -2,7 +2,8 @@ var http = require("http"),
     url = require("url"),
     path = require("path"),
     fs = require("fs"),
-mk = require("./maketor"),
+    mk = require("./maketor"),
+    db = require("./maxdb"),
     port = 3030,
     host= "localhost",
     wdir = "site",
@@ -137,7 +138,7 @@ function send_registered_folders(response,folders) {
 }*/
 function send_text(res,s) {
   res.writeHead(200,
-  {"Content-Type": "text/plain" },
+  {"Content-Type": "text/plain;" },
   {"Cache-Control" : "no-cache, no-store, must-revalidate"},
   {"Pragma" : "no-cache"},
   {"Expires": 0 });
@@ -247,6 +248,8 @@ function send_file_part(req, res, file, x) {
 function send_file_quicktime(req, res, file, x) {
 
   console.log("QT :" + file);
+  console.log(req.headers);
+
   var maxchunk = 1024 * 64;
 
   var stats = fs.statSync(file);
@@ -279,18 +282,67 @@ function send_file_quicktime(req, res, file, x) {
   , 'end': end
   };
 
-  res.writeHead((x.range? 206 :200), {
+  res.writeHead(206 , {
     //if(x.winphone){
-    //"Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "*",
+    "Etag": "a404b-c3f-47c3a14937c80",
     //"File-Size": chunksize,
-
+    "Content-Encoding": 'gzip' ,
     "Content-Range": "bytes " + start + "-" + end + "/" + total,
     "Accept-Ranges": "bytes",
     "Content-Length": chunksize,
     "Content-Type": "video/mp4"
   });
+  
+  
+   fm_send(res, file, options);
+  //var zlib = require("zlib");
+  //var stream = fs.createReadStream(file, options);
+  //stream.pipe(zlib.createGzip()).pipe(res)
+  //.on("error", function (e) {
+  //  console.log("QT ERROR : " + e);
+  //});
 
-  fm_send(res, file, options);
+  //res.pipe(zlib.createGunzip()).pipe(stream);
+
+  //var gunzip = zlib.createGunzip();
+  //stream.pipe(gunzip);
+  //res.pipe(gunzip);
+
+  //gunzip.on('data', function (data) {
+  //  res.write(data);
+  //}).on("end", function () {
+  //  res.end();
+  //}).on("error", function (e) {
+  //  res.end();
+  //});
+
+  //zlib.deflate(streem, function (err, buffer) {
+  //  if (err) throw err;
+
+  //  res.writeHead(200, {
+  //    'Content-Encoding': 'deflate',
+  //    'Content-Type': 'text/javascript'
+  //  });
+
+  //  res.end(buffer);
+  //});
+  //var gunzip = zlib.createGunzip();
+  //response.pipe(gunzip);
+  //gunzip.on('data', function (data) {
+
+  //  buffer.push(data);
+  //}).on("end", function () {
+  //  res.writeHead(200, { "Content-Type": "application/json;  charset=windows-1251;" });
+  //  res.write(s);
+  //  res.end();
+
+  //}).on("error", function (e) {
+  //  //callback(e);
+  //});
+
+
+
 
 }
 
@@ -460,11 +512,41 @@ http.createServer(function(req, res) {
 
     try {
         var x = check_redirect(req);
+        
 
+        if (req.method == 'POST') {
+          var method = x.func;
+          var body = '';
+          req.on('data', function (data) {
+            body += data;
+
+          });
+          req.on('end', function () {
+
+            var qs = require("querystring");
+            var prms = qs.parse(body);
+            
+            if (method === "note.add") {
+              db.notes_add(prms.txt, function (data) {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.write(data);
+                res.end();
+              });
+            }
+            else if (method === "note.update") {
+              db.notes_update(prms.id, prms.txt, function (data) {
+                res.writeHead(200, { "Content-Type": "application/json" });
+                res.write(data);
+                res.end();
+              });
+            }
+          });
+          return;
+        }
         //    console.log("url:" +decodeURIComponent(req.url));
         //  var uri = decodeURIComponent(url.parse(request.url).pathname)
         //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
-
+     //   console.log(req.connection.remoteAddress);
         var query = decodeURIComponent(req.url);
         var ua = req.headers['user-agent'];
         var quicktime = ua.indexOf("QuickTime") >= 0;
@@ -492,8 +574,48 @@ http.createServer(function(req, res) {
                 return;
             case "mkdir":
                 return fm_create_folder(res, x.prms.folder, x.prms.name);
+          case "get.servers":
+            db.get_servers(function (data) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            });
+            return;
 
-            default:
+          case "links.get":
+            db.links_get(x.prms.offset, x.prms.count, function (data) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            });
+            return;
+
+          case "notes.get":
+            db.notes_get(x.prms.offset, x.prms.count, function (data) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            //}, function (err) {
+            //  res.writeHead(200, { "Content-Type": "application/json" });
+            //  res.write(err);
+            //  res.end();
+            });
+            return;
+          case "notes.delete":
+            db.notes_delete(x.prms.id, function (data) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            });
+            return;
+          case "notes.note":
+            db.notes_note(x.prms.id, function (data) {
+              res.writeHead(200, { "Content-Type": "application/json" });
+              res.write(data);
+              res.end();
+            });
+            return;
+          default:
                 break;
         }
 
@@ -579,15 +701,17 @@ function register_server() {
 
   http.request(options, callback).end();
 }
-function load_registered_servers() {
+function load_registered_servers123(res) {
 
   var http = require('http');
+  var zlib = require("zlib");
 
   //http://maxbuk.com/regsrv.php?name=waswas_lenovo&port=3030
   //Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36
   var options = {
     host: 'www.maxbuk.com',
-    path: '/srvlist.php', // + port
+    path: '/srvlist2.php', // + port
+    encoding: 'binary',
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36',
       'Accept': '*/*',
@@ -604,27 +728,62 @@ function load_registered_servers() {
       "Content-Length": 0
     }
   };
+  
+
+  var buffer = [];
+  var s = "";
 
   callback = function (response) {
-    var str = '';
 
-    response.on('data', function (chunk) {
-      str += chunk;
+    var gunzip = zlib.createGunzip();
+    response.pipe(gunzip);
+    gunzip.on('data', function (data) {
+
+      buffer.push(data);
+    }).on("end", function () {
+
+      //var StringDecoder = require('string_decoder').StringDecoder;
+      //var decoder = new StringDecoder('utf-8');
+
+      //var s = buffer.join("");
+      //console.log(decoder.write(s));
+
+      res.writeHead(200, { "Content-Type": "application/json;  charset=windows-1251;" });
+      res.write(s);
+      res.end();
+
+    }).on("error", function (e) {
+      //callback(e);
     });
 
-    response.on('end', function () {
-      console.log(str);
-      console.log(".........................................");
-      console.log(response.headers);
-    });
+  //  var str = '';
+  //  response.setEncoding('utf-8');
+  //  response.on('data', function (chunk) {
+  //    str += chunk;
+  //  });
+
+  //  response.on('end', function () {
+  //    //{ "Content-Type": "text/plain; charset=windows-1251;" }
+
+  //    //var body = new Buffer(str, 'binary');
+  //    //conv = new iconv.Iconv('windows-1251', 'utf8');
+  //    //body = conv.convert(body).toString();
+  //    //console.log(body);
+
+  //    console.log(str);
+  //    console.log(response.headers);
+  //    res.writeHead(200,{ "Content-Type": "text/plain;charset=windows-1251;" });
+  //    res.write(str);
+  //    res.end();
+  //  });
   }
 
-  http.request(options, callback).end();
+ http.request(options, callback).end();
 }
 
 
 
-
+var mysql = require('mysql');
 
 load_public_folders();
 
@@ -654,3 +813,4 @@ for (var k in interfaces) {
 console.log(addresses);
 //load_registered_servers();
 //register_server();
+

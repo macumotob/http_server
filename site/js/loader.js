@@ -20,6 +20,57 @@ function load_async(file,onsuccess) {
   };
   xhr.send(null);
 }
+function post(url,data,cb) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+ // http.setRequestHeader("Content-length", data.length);
+ // http.setRequestHeader("Connection", "close");
+
+  xhr.onreadystatechange = function () {//Call a function when the state changes.
+    if (xhr.readyState == 4) {
+      if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+        var text = xhr.responseText;
+        cb( eval( "(" + text + ")"));
+      }
+    }
+  };
+  xhr.send(data);
+}
+function load_async_(file, onsuccess) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("get", file, true);
+  xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+ // xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.124 Safari/537.36');
+  xhr.setRequestHeader('Accept', '*/*');
+  //xhr.setRequestHeader("Host", "xyz.com:8000");
+  xhr.setRequestHeader("Accept", "*/*");
+  xhr.setRequestHeader("Accept-Language", "en-US,en;q=0.5");
+  //xhr.setRequestHeader("Accept-Encoding", "gzip, deflate");
+  //xhr.setRequestHeader("DNT", "1");
+  //xhr.setRequestHeader("Referer", "http://localhost:8000/test/");
+  //xhr.setRequestHeader("Origin", "http://localhost:8000");
+  //xhr.setRequestHeader("Connection", "keep-alive");
+  xhr.setRequestHeader("Pragma", "no-cache");
+  xhr.setRequestHeader("Cache-Control", "no-cache");
+  //xhr.setRequestHeader("Content-Length", 0);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4) {
+      if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+        var text = xhr.responseText;
+        //  var heders = xhr.getResponseHeader("content-type");
+        onsuccess(text);
+      }
+    }
+  };
+  xhr.send(null);
+}
+
+
+
+
+
 function load_sync(file) {
   var xhr = new XMLHttpRequest();
   xhr.open("get", file, false);
