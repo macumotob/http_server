@@ -183,8 +183,10 @@
 </ul>
 <!--#fm-notes-body-->
 <div class="panel panel-default" id="tr{{index}}">
-  <div class="panel-heading" data-method="fm.show_edit_note" data-args="{{item.id}}">{{(index+1+fm.offset)}}. <b class="text-primary">{{item.data}}</b> {{item.id}}
-    <span class="glyphicon glyphicon-eye-open"></span>
+  <div class="panel-heading" style="cursor:pointer;"
+data-method="fm.show_edit_note" data-args="{{item.id}}">{{(index+1+fm.offset)}}.
+ <b class="text-primary">{{item.data}}</b>
+    <span class="glyphicon glyphicon-pencil"></span>
   </div>
   <div class="panel-body">
     {{item.txt}}

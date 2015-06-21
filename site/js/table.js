@@ -30,6 +30,7 @@
         if (info) {
           info.innerHTML = "records:" + self.offset;
         }
+        fm.dropdown_hide();
       }
       else {
         alert(data.msg);

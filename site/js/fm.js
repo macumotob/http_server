@@ -1,4 +1,19 @@
-﻿function fm_viewer(ident) {
+﻿HTMLElement.prototype.removeClass = function (remove) {
+  var newClassName = "";
+  var i;
+  var classes = this.className.split(" ");
+  for (i = 0; i < classes.length; i++) {
+    console.log(classes[i]);
+    if (classes[i] !== remove) {
+      newClassName += classes[i] + " ";
+    }
+  }
+  this.className = newClassName;
+}
+
+
+
+function fm_viewer(ident) {
   this.id = ident;
   this.files = [];
   this.index = 0;
@@ -264,6 +279,12 @@ var fm = {
     }
   });
 }
+, dropdown_hide: function () {
+  var drop = id("#dropdown-left");
+  if (drop) {
+    drop.removeClass("open");
+  }
+}
 , offset: 0
 , last_notes: false
 , reset_notes: function () {
@@ -299,6 +320,7 @@ var fm = {
       if (info) {
         info.innerHTML = "records:" + self.offset;
       }
+      self.dropdown_hide();
     } else {
       fm_set_main_content(generator.generate_one(data.msg, "fm-mysql-error"));
       $("#myModal").modal();
