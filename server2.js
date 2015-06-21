@@ -562,6 +562,7 @@ function fm_process_get(x, req, res) {
 
  // console.log(req.headers['accept-encoding']);
   var query = decodeURIComponent(req.url);
+  //console.log(query);
   var ua = req.headers['user-agent'];
   var quicktime = ua.indexOf("QuickTime") >= 0;
   //  console.log("agent:" + ua);
