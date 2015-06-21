@@ -1,6 +1,7 @@
 ﻿[
-  { "name": "Книги"  , "path": "E:/Books/" },
-  { "name": "Иван"   , "path": "E:/Ivan/" },
-  { "name": "Аудио"  , "path": "E:/Books/_Audio/" },
-  { "name": "Музыка" , "path": "F:/_music/"}
+  { "name": "TEST", "path" :  "C:/delete_me/"},
+  { "name": "Книги", "path": "E:/Books/" },
+  { "name": "Иван", "path": "E:/Ivan/" },
+  { "name": "Аудио", "path": "E:/Books/_Audio/" },
+  { "name": "Музыка", "path": "F:/_music/" }
 ]

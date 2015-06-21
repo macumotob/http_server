@@ -1,10 +1,12 @@
 ﻿
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 var COBA_UPLOAD_FILES = [];
+var coba_upload_cancel = false;
 
 function coba_enable_upload()
 {
-  fm_set_main_content(generator.generate_one(null,"fm-upload-complete"));
+  //fm_set_main_content(generator.generate_one(null,"fm-upload-complete"));
+  fm_refresh();
 }
 
 function coba_format_bytes(bytes)
@@ -91,6 +93,9 @@ function coba_upload_part(file, blobs, poss, first, dv)
           {
             coba_enable_upload();
           }
+          else { //ww
+            coba_upload_files();
+          }
         }
         else {
           coba_upload_part(file, blobs, poss, false,dv);
@@ -126,7 +131,8 @@ function coba_upload_file(file,td)
   var blobs = [];
   var poss = [];
 
-  var bytes_per_chunk = 1024 * 1024;
+  //var bytes_per_chunk = 1024 * 1024;
+  var bytes_per_chunk = 1024 * 512;
   var start = 0;
   var end = bytes_per_chunk;
   var size = file.size;
@@ -141,7 +147,24 @@ function coba_upload_file(file,td)
   coba_upload_part(file, blobs, poss, true, td);
 }
 
-function coba_upload_files()
+function coba_upload_files() {
+  try {
+    if (COBA_UPLOAD_FILES.length == 0) {
+      fm_show_error("select files to upload!");
+      return;
+    }
+    var i = 0;
+
+    var file = COBA_UPLOAD_FILES[i].file;
+    var td = COBA_UPLOAD_FILES[i].td;
+    coba_upload_file(file, td);
+  }
+  catch (err) {
+    alert(err);
+  }
+}
+
+function coba_upload_files2()
 {
   try{
     if (COBA_UPLOAD_FILES.length == 0)

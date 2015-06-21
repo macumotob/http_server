@@ -76,6 +76,7 @@ var generator = {
 }
 , generate: function (data, maket_name) {
   var m = this.makets[maket_name];
+  
   var maket = this.makets[maket_name].p;
   var html = "";
 

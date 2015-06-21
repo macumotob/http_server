@@ -1,5 +1,5 @@
 ﻿
-<!--#fm-file-row-->
+<!--#fm-file-row111-->
 <div class="row">
   <div class="col-xs-12 bg-success">
     <p style="cursor:pointer"
@@ -18,10 +18,10 @@
     </p>
   </div>
 </div>
-<!--#fm-folder-row-->
+<!--#fm-folder-row111-->
 <div class="row">
   <div class="btn btn-primary col-xs-12 text-left"
-       data-method="init_document" data-args="{{encodeURI(item.name)}}">
+       data-method="init_document" data-args="{{encodeURIComponent(item.name)}}">
     {{item.name}}
   </div>
 </div>
@@ -30,26 +30,21 @@
 <table class="table table-striped" style="cursor:pointer">
   <!--#fm-list-folder-body-->
   <tr class="text-primary">
-    <td data-method="init_document" data-args="{{encodeURI(item.name)}}">
-      <b><i>{{item.name}}</i></b>
-    </td>
-    <td data-method="init_document" data-args="{{encodeURI(item.name)}}">&gt;</td>
+    <td onclick="init_document('{{item.name}}');"><b><i>{{item.name}}</i></b></td>
+    <td data-method="init_document" data-args="{{item.name}}">&gt;</td>
   </tr>
   <!--#fm-list-file-body-->
   <tr class="text-success">
-    <td colspan="2" data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">
-<p><b>{{item.name}}</b></p>
+    {{* var nm = fm.encode(item.name);}}
+    <td colspan="2" data-method="fm_get_file" data-args="{{nm}}"><p><b>{{item.name}}</b></p>
       <div class="row">
         <div class="col-xs-3">{{get_file_ext(item.name)}}</div>
         <div class="col-xs-3">{{coba_format_bytes(item.size)}}</div>
-        <div class="col-xs-3 text-success text-center" 
-             data-method="fm_get_file" data-args="{{encodeURI(item.name)}}">view</div>
-        <div class="col-xs-3 text-primary text-center"
-             data-method="fm.download_file" data-args="{{encodeURI(item.name)}}">download</div>
+        <div class="col-xs-3 text-success text-center"
+             onclick='fm_get_file("{{nm}}");'>view</div>
+        <div class="col-xs-3 text-primary text-center" data-method="fm.download_file" data-args="{{nm}}">download</div>
       </div>
-
-</td>
-   <!-- <td><b>{{get_file_ext(item.name)}}</b></td>-->
+    </td>
   </tr>
   <!--#fm-list-footer-->
 </table>
@@ -62,7 +57,7 @@
   <tbody>
     <!--#fm-popup-body-->
     <tr>
-<td data-method="fm_refresh_by_index" data-args="{{index}}">{{decodeURI(item)}}</td>
+<td data-method="fm_refresh_by_index" data-args="{{index}}">{{item}}</td>
 <td>&gt;</td>
 </tr>
     <!--#fm-popup-footer-->
@@ -73,11 +68,13 @@
 <table class="table table-striped">
   <tr>
     <!--#fm-bread-body-->
-    {{*   var text = decodeURI(item); text = text[text.length - 1] == '/' ? text : text + '/';}}
+    {{*   var text = item; text = text[text.length - 1] == '/' ? text : text + '/';}}
     <td data-method="fm_refresh_by_index" data-args="{{index}}">{{text}}</td>
     <!--#fm-bread-footer-->
   </tr>
 </table>
+
+
 <!--#fm-create-folder-->
 <form class="form-horizontal">
   <div class="form-group">
@@ -103,8 +100,8 @@
     </tr>
   </table>
 
-  
-    <table class="table container" id="control_progress"></table>
+ <table class="table container" id="control_progress"></table>
+
 <!--#fm-empty-folder-->
 <form class="form">
 <div class="col-xs-12 text-center text-danger"><b>{{lng.ef.worning}}</b></div>
@@ -118,24 +115,25 @@
   </div>
 </form>
 
-<!--#fm-video-header-->
+<!--#fm-video-header11-->
 <table class="table">
-<!--#fm-video-body-->
+<!--#fm-video-body11-->
 <tr><td>
       <video id="thumb" controls preload="metadata">
         <source src="{{item.name}}">
      </video>
 </td></tr>
-<!--#fm-video-footer-->
+<!--#fm-video-footer11-->
 </table>
+
 <!--#fm-upload-complete-->
 <div class="container">
 <p class="text-primary" > Upload complete successfully</p>
 <p> <b data-method="fm_refresh">Refresh folder content</b></p>
 <p> <b data-method="create_upload_form">Upload More files</b></p>
 </div>
-<!--#fm-video-header-->
 
+<!--#fm-video-header-->
 {{* fm.video.sort();}}
 <div id="rot">
  <video id="video" width="320px" height="240px" preload="auto"  src="" controls="controls" onended="fm.video.next();"></video>
@@ -143,7 +141,7 @@
 <div class="pre-scrollable">
   <table class="table">
     <!--#fm-video-body-->
-    <tr id="tr{{index}}" data-method="fm.video.play" data-args="{{index}}"><td>{{(index+1)}}</td><td>{{item.name}}</td>
+    <tr id="tr{{index}}" onclick="fm.video.play({{index}});"><td>{{(index+1)}}</td><td>{{item.name}}</td>
       <td class="text-right">{{coba_format_bytes(item.size)}}</td>
     </tr>
     <!--#fm-video-footer-->
@@ -163,14 +161,6 @@
   </table>
 </div>
 
-<!--#fm-ext-menu-->
-
-<table class="table">
-  <tr data-method="fm.show_notes"><td class="text-primary">Заметки</td></tr>
-  <tr data-method="fm.links.show"><td class="text-primary">Полезные ссылки</td></tr>
-  <tr data-method="fm.show_servers"><td class="text-primary">Список серверов на www.maxbuk.com</td></tr>
-  <tr data-method="fm.open_site" data-args="www.maxbuk.com"><td class="text-primary">Сайт www.maxbuk.com</td></tr>
-</table>
 <!--#fm-servers-header-->
 <!--#fm-servers-body-->
 <div class="panel panel-default" id="tr{{index}}">
@@ -193,7 +183,9 @@
 </ul>
 <!--#fm-notes-body-->
 <div class="panel panel-default" id="tr{{index}}">
-  <div class="panel-heading" data-method="fm.show_edit_note" data-args="{{item.id}}">{{(index+1+fm.offset)}}. <b class="text-primary">{{item.data}}</b> {{item.id}}</div>
+  <div class="panel-heading" data-method="fm.show_edit_note" data-args="{{item.id}}">{{(index+1+fm.offset)}}. <b class="text-primary">{{item.data}}</b> {{item.id}}
+    <span class="glyphicon glyphicon-eye-open"></span>
+  </div>
   <div class="panel-body">
     {{item.txt}}
   </div>
@@ -208,6 +200,8 @@
 </ul>
 
 
+
+
 <!--#fm-add-note-header-->
 <div class="panel panel-primary">
   <div class="panel-heading">Add new note</div>
@@ -219,7 +213,7 @@
       </div>
       <button type="button" class="btn btn-default" data-method="fm.show_notes">Cancel</button>
       <button type="button" class="btn btn-primary"
-              data-method="fm.save_new_note">&nbsp; Save &nbsp;</button>
+              data-method="fm.save_new_note">Save</button>
     </form>
 </div>
   <div class="panel-footer">
@@ -254,6 +248,88 @@
 
 <!--#fm-edit-note-body-->
 <!--#fm-edit-note-footer-->
+
+
+<!--#fm-links-header-->
+
+<ul class="pager">
+  <li class="previous"><a href="#" data-method="fm.links.show_offset" data-args="-10">Prev</a></li>
+  <li><a href="#" data-method="fm.links.show_add">Add</a></li>
+  <li class="text-danger" id="notes-info">...</li>
+  <li class="next"><a href="#" data-method="fm.links.show_offset" data-args="10">Next</a></li>
+</ul>
+
+
+<!--#fm-links-body-->
+<div class="panel panel-default" id="tr{{index}}">
+  <div class="panel-heading" data-method="fm.links.edit" data-args="{{item.id}}">
+    {{(index+1+fm.links.offset)}}. <b class="text-primary">{{item.title}}</b> id:{{item.id}}
+    <span class="glyphicon glyphicon-pencil"></span>
+  </div>
+  <div class="panel-body">
+    {{item.href}}
+  </div>
+</div>
+
+<!--#fm-links-footer-->
+<ul class="pager">
+  <li class="previous"><a href="#" data-method="fm.links.show_offset" data-args="-10">Prev</a></li>
+  <li><a href="#" data-method="fm.links.show_add">Add</a></li>
+  <li class="text-danger" id="notes-info">...</li>
+  <li class="next"><a href="#" data-method="fm.links.show_offset" data-args="10">Next</a></li>
+</ul>
+
+<!--#fm-links-edit-header-->
+<div class="panel panel-primary">
+  <div class="panel-heading">Edit link Id:{{item.id}} {{item.title}}</div>
+  <div class="panel-body">
+    <form role="form">
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <textarea class="form-control" rows="5" id="title" fm-name="title" >{{item.title}}</textarea>
+        <label for="href">href:</label>
+        <textarea class="form-control" rows="5" id="href" fm-name="href">{{item.href}}</textarea>
+      </div>
+      <button type="button" class="btn btn-danger"
+              data-method="fm.links.delete" data-args="{{item.id}}">
+        Delete
+      </button>
+      <button type="button" class="btn btn-default" data-method="fm.links.show">Cancel</button>
+      <button type="button" class="btn btn-primary"
+              data-method="fm.links.update" data-args="{{item.id}}">
+        &nbsp; Save &nbsp;
+      </button>
+    </form>
+  </div>
+  <div class="panel-footer">
+  </div>
+</div>
+
+<!--#fm-links-edit-body-->
+<!--#fm-links-edit-footer-->
+
+<!--#fm-links-add-header-->
+<div class="panel panel-primary">
+  <div class="panel-heading">Add new link</div>
+  <div class="panel-body">
+    <form role="form">
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <textarea class="form-control" rows="5" id="title" fm-name="title"></textarea>
+        <label for="href">href:</label>
+        <textarea class="form-control" rows="5" id="href" fm-name="href"></textarea>
+      </div>
+      <button type="button" class="btn btn-default" data-method="fm.links.show">Cancel</button>
+      <button type="button" class="btn btn-primary" data-method="fm.links.add">&nbsp; Save &nbsp;</button>
+    </form>
+  </div>
+  <div class="panel-footer">
+  </div>
+</div>
+
+<!--#fm-links-add-body-->
+<!--#fm-links-add-footer-->
+
 
 <!--#fm-mysql-error-->
 

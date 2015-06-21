@@ -345,7 +345,55 @@ function send_file_quicktime(req, res, file, x) {
 
 
 }
+function fm_send_zip(filename, res) {
 
+  //console.log("ZIP:" + filename);
+  var zlib = require('zlib');
+  //var http = require('http');
+  var fs = require('fs');
+
+  var raw = fs.createReadStream(filename);
+
+  var headers = {};
+  headers["Content-Type"] = "text/plain; charset=windows-1251;";
+  headers["Content-Encoding"] = "gzip";
+  //headers["Content-Encoding"] = "deflate";
+
+  res.writeHead(200, headers);
+  
+  raw.pipe(zlib.createGzip())
+    .on('error', function (e) {
+      console.log(e)
+    })
+    .pipe(res)
+    .on('error', function (e) {
+      console.log(e)
+    })
+    .on('finish', function () {  // finished
+     // console.log('done send commpress');
+      raw.close();
+  });
+  return;
+  
+  raw.pipe(zlib.createDeflate()).pipe(res);
+  return;
+  //var acceptEncoding = request.headers['accept-encoding'];
+  //if (!acceptEncoding) {
+  //  acceptEncoding = '';
+  //}
+
+  //if (acceptEncoding.match(/\bdeflate\b/)) {
+  //  response.writeHead(200, { 'content-encoding': 'deflate' });
+  //  raw.pipe(zlib.createDeflate()).pipe(response);
+  //} else if (acceptEncoding.match(/\bgzip\b/)) {
+  //  response.writeHead(200, { 'content-encoding': 'gzip' });
+  //  raw.pipe(zlib.createGzip()).pipe(response);
+  //} else {
+  //  response.writeHead(200, {});
+  //  raw.pipe(response);
+  //}
+
+}
 function send_file(response,filename,is_mobile) {
 
  // console.log("send_file : " + filename);
@@ -355,7 +403,7 @@ function send_file(response,filename,is_mobile) {
     '.css':  "text/css",
     '.js': "text/javascript",
     '.json': "application/json",
-'.txt':"text/plain"
+    '.txt': "text/plain; charset=windows-1251;"
   };
 
 
@@ -380,13 +428,15 @@ function send_file(response,filename,is_mobile) {
 
     var headers = {};
     var ext = path.extname(filename);
+  //  console.log("EXT:" + ext);
+
+    if (ext === ".txt") {
+      return fm_send_zip(filename, response);
+    }
     var contentType = contentTypesByExtension[ext];
     if (contentType) {
       headers["Content-Type"] = contentType;
     }
-    else {
-    }
-
   //  206 Partial Content
   //  Content-Type: video/mp4
     headers["Content-Length"] = total;
@@ -507,155 +557,212 @@ function check_redirect(req) {
   }
   return x;
 }
+function fm_process_get(x, req, res) {
+
+
+ // console.log(req.headers['accept-encoding']);
+  var query = decodeURIComponent(req.url);
+  var ua = req.headers['user-agent'];
+  var quicktime = ua.indexOf("QuickTime") >= 0;
+  //  console.log("agent:" + ua);
+  //  console.log("range:" + x.range + " quick:" + quicktime);
+  //  console.log(req.headers);
+  //  var is_mobile = /phone|iphone/i.test(ua);
+
+  switch (x.func) {
+    case "get.folder":
+      return send_folder_content(res, x.prms.folder);
+
+    case "get.file":
+      if (quicktime) {
+        return send_file_quicktime(req, res, x.prms.file, x);
+      }
+      if (x.range || x.winphone) {
+        //  console.log(x.prms.file);
+        return send_file_part(req, res, x.prms.file, x);
+      }
+      return send_file(res, x.prms.file, x.mobile);
+    case "get.maket":
+      // console.log(wfolder + x.prms.name);
+      mk.parse(wfolder + x.prms.name, function (data) { send_json(res, data); });
+      return;
+    case "mkdir":
+      return fm_create_folder(res, x.prms.folder, x.prms.name);
+    case "get.servers":
+      db.get_servers(function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+
+    case "links.page":
+      db.links_get_page(x.prms.offset, x.prms.count, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+    case "links.edit":
+      db.links_edit(x.prms.id, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+    case "links.delete":
+      db.links_delete(x.prms.id, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+
+    case "notes.get":
+      db.notes_get_page(x.prms.offset, x.prms.count, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+    case "notes.delete":
+      db.notes_delete(x.prms.id, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+    case "notes.note":
+      db.notes_note(x.prms.id, function (data) {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.write(data);
+        res.end();
+      });
+      return;
+    default:
+      break;
+  }
+
+  if (x.func === "/") {
+
+    if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
+      var action = req.headers['baybak-action'];
+      var info = req.headers['coba-file-info'];
+      var ctype = req.headers['content-type'];
+      if (ctype) {
+        //console.log('type   :' + ctype);
+      }
+      if (action) {
+        //console.log("action : " + action);
+      }
+      if (info) {
+        // console.log("upload info:" + info);
+        var qs = require("querystring");
+        var prms = qs.parse(info);
+        upload_file(req, res, prms);
+      }
+      return;
+    }
+    //  send_file(res, x.file, x.mobile);
+    //  return;
+    //if (quicktime) {
+    //  return send_file_quicktime(req, res, x.file, x);
+    //}
+    if (x.range || x.winphone === "1") {
+      return send_file_part(req, res, x.file, x);
+    }
+
+    return send_file(res, x.file, x.mobile);
+  }
+
+}
+function fm_process_post(x,req,res) {
+
+    var method = x.func;
+    var body = '';
+
+    if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
+      var action = req.headers['baybak-action'];
+      var info = req.headers['coba-file-info'];
+      var ctype = req.headers['content-type'];
+      if (info) {
+        
+        var qs = require("querystring");
+        var prms = qs.parse(info);
+     //   console.log("upload params:" + prms);
+        upload_file(req, res, prms);
+      }
+      return;
+    }
+    //  send_file(res, x.file, x.mobile);
+    //  return;
+    //if (quicktime) {
+    //  return send_file_quicktime(req, res, x.file, x);
+    //}
+    if (x.range || x.winphone === "1") {
+      return send_file_part(req, res, x.file, x);
+    }
+
+    //return send_file(res, x.file, x.mobile);
+    /////////////////
+    req.on('data', function (data) {
+      body += data;
+
+    });
+    req.on('end', function () {
+
+      var qs = require("querystring");
+      var prms = qs.parse(body);
+      if (method === "note.add") {
+        db.notes_add(prms.txt, function (data) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(data);
+          res.end();
+        });
+      }
+      else if (method === "note.update") {
+        db.notes_update(prms.id, prms.txt, function (data) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(data);
+          res.end();
+        });
+      }
+      else if (method === "links.update") {
+        db.links_update(prms.id, prms, function (data) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(data);
+          res.end();
+        });
+      }
+      else if (method === "links.add") {
+        db.links_add(prms, function (data) {
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.write(data);
+          res.end();
+        });
+      }
+    });
+    return;
+}
 
 http.createServer(function(req, res) {
 
-    try {
-        var x = check_redirect(req);
-        
-
-        if (req.method == 'POST') {
-          var method = x.func;
-          var body = '';
-          req.on('data', function (data) {
-            body += data;
-
-          });
-          req.on('end', function () {
-
-            var qs = require("querystring");
-            var prms = qs.parse(body);
-            
-            if (method === "note.add") {
-              db.notes_add(prms.txt, function (data) {
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.write(data);
-                res.end();
-              });
-            }
-            else if (method === "note.update") {
-              db.notes_update(prms.id, prms.txt, function (data) {
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.write(data);
-                res.end();
-              });
-            }
-          });
-          return;
-        }
-        //    console.log("url:" +decodeURIComponent(req.url));
-        //  var uri = decodeURIComponent(url.parse(request.url).pathname)
-        //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
-     //   console.log(req.connection.remoteAddress);
-        var query = decodeURIComponent(req.url);
-        var ua = req.headers['user-agent'];
-        var quicktime = ua.indexOf("QuickTime") >= 0;
-      //  console.log("agent:" + ua);
-      //  console.log("range:" + x.range + " quick:" + quicktime);
-      //  console.log(req.headers);
-        //  var is_mobile = /phone|iphone/i.test(ua);
-
-        switch (x.func) {
-            case "get.folder":
-                return send_folder_content(res, x.prms.folder);
-
-            case "get.file":
-                if (quicktime) {
-                    return send_file_quicktime(req, res, x.prms.file, x);
-                }
-                if (x.range || x.winphone) {
-                    //  console.log(x.prms.file);
-                    return send_file_part(req, res, x.prms.file, x);
-                }
-                return send_file(res, x.prms.file, x.mobile);
-            case "get.maket":
-                // console.log(wfolder + x.prms.name);
-                mk.parse(wfolder + x.prms.name, function (data) { send_json(res, data); });
-                return;
-            case "mkdir":
-                return fm_create_folder(res, x.prms.folder, x.prms.name);
-          case "get.servers":
-            db.get_servers(function (data) {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.write(data);
-              res.end();
-            });
-            return;
-
-          case "links.get":
-            db.links_get(x.prms.offset, x.prms.count, function (data) {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.write(data);
-              res.end();
-            });
-            return;
-
-          case "notes.get":
-            db.notes_get(x.prms.offset, x.prms.count, function (data) {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.write(data);
-              res.end();
-            //}, function (err) {
-            //  res.writeHead(200, { "Content-Type": "application/json" });
-            //  res.write(err);
-            //  res.end();
-            });
-            return;
-          case "notes.delete":
-            db.notes_delete(x.prms.id, function (data) {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.write(data);
-              res.end();
-            });
-            return;
-          case "notes.note":
-            db.notes_note(x.prms.id, function (data) {
-              res.writeHead(200, { "Content-Type": "application/json" });
-              res.write(data);
-              res.end();
-            });
-            return;
-          default:
-                break;
-        }
-
-        if (x.func === "/") {
-
-            if (x.query === '/open' || x.query === '/continue' || x.query === '/close') {
-                var action = req.headers['baybak-action'];
-                var info = req.headers['coba-file-info'];
-                var ctype = req.headers['content-type'];
-                if (ctype) {
-                    //console.log('type   :' + ctype);
-                }
-                if (action) {
-                    //console.log("action : " + action);
-                }
-                if (info) {
-                    // console.log("upload info:" + info);
-                    var qs = require("querystring");
-                    var prms = qs.parse(info);
-                    upload_file(req, res, prms);
-                }
-                return;
-            }
-            //  send_file(res, x.file, x.mobile);
-            //  return;
-            if (quicktime) {
-                return send_file_quicktime(req, res, x.file, x);
-            }
-            if (x.range || x.winphone === "1") {
-                return send_file_part(req, res, x.file, x);
-            }
-
-            return send_file(res, x.file, x.mobile);
-
-
-        }
-    }
-    catch (err) {
-        error_handler(res, err);
-    }
+  //    console.log("url:" +decodeURIComponent(req.url));
+  //  var uri = decodeURIComponent(url.parse(request.url).pathname)
+  //     , filename = decodeURIComponent(path.join(process.cwd(), uri));
+  //   console.log(req.connection.remoteAddress);
+      var x = check_redirect(req);
+      switch (req.method) {
+        case "POST":
+          fm_process_post(x,req,res);
+          break;
+        case "GET":
+          fm_process_get(x, req, res);
+          break;
+        default:
+          console.log("ERROR METHOD :" + req.method);
+          break;
+      }
 }).listen(port,host);
 
 

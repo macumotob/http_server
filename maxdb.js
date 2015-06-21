@@ -65,16 +65,31 @@ exports.get_servers = function (cb) {
   }
 }
 
-exports.links_get = function (offset, count, cb) {
+exports.links_get_page = function (offset, count, cb) {
   offset = parseInt(offset);
   count = parseInt(count);
   exec("call youtube_get_page(?,?)", [offset, count], cb);
 }
-exports.notes_get = function (offset, count, cb) {
+exports.links_edit = function (id, cb) {
+  id = parseInt(id);
+  exec("call youtube_get(?)", [id], cb);
+}
+exports.links_update = function (id, prms, cb) {
+  id = parseInt(id);
+  exec("call youtube_update(?,?,?)", [id,prms.href,prms.title], cb);
+}
+exports.links_add = function (prms, cb) {
+  exec("call youtube_add(?,?)", [prms.href, prms.title], cb);
+}
+exports.links_delete = function (id, cb) {
+  console.log("delete :" + id);
+  id = parseInt(id);
+  exec("call youtube_delete(?)", [id], cb);
+}
+exports.notes_get_page = function (offset, count, cb) {
   offset = parseInt(offset);
   count = parseInt(count);
   exec("call diary_get_page(?,?)", [offset, count], cb);
-  //exec("select id,txt , DATE_FORMAT( ldt,  '%d-%M-%Y %h:%m:%s' ) AS data  from diary order by ldt desc  limit ?,?", [offset, count], cb);
 }
 exports.notes_note = function (id,cb) {
   cnn.query("select id,txt , DATE_FORMAT( ldt,  '%d-%M-%Y %h:%m:%s' ) AS data  from diary where id=?",[id], function (err, results) {

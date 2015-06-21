@@ -136,16 +136,21 @@ var fm = {
     video: 1,
     audio: 2,
     document: 3,
-    image: 4
+    image: 4,
+    html : 5
   }
 , audio: new fm_viewer("audio")
 , video: new fm_viewer("video")
 , links: new fm_table("links")
+, encode: function (s) {
+  return encodeURIComponent(s);
+}
 , get_file_type: function (ext) {
   if ("pdf;doc;mobi;fb2;txt;epub;rtf;doc;".indexOf(ext + ';') >= 0) return this.file_type.document;
   if ("mp4;mov;3gp;ogg;avi;mkv;vob;".indexOf(ext + ';') >= 0) return this.file_type.video;
   if ("jpg;png;".indexOf(ext + ';') >= 0) return this.file_type.image;
   if ("mp3;".indexOf(ext + ';') >= 0) return this.file_type.audio;
+  if ("html;".indexOf(ext + ';') >= 0) return this.file_type.html;
   return this.file_type.unknown;
 }
 , errors: {
@@ -403,10 +408,11 @@ function create_upload_form() {
 
   fm.state.current = fm.state.upload;
 
-return (fm.stack.length == 0 ?
-     fm_show_error(fm.errors.upload_select_folder) 
-   : fm_set_main_content(generator.generate_one(null, "fm-upload-form"))
-  );
+  if (fm.stack.length == 0 ){
+    fm_show_error(fm.errors.upload_select_folder) 
+  }
+  fm_set_main_content(generator.generate_one(null, "fm-upload-form"));
+  control_upload_files.click();
 }
 function create_folder_form() {
 
@@ -418,7 +424,7 @@ function create_folder_form() {
 function fm_get_file(file) {
 
   var elem = fm.get_main_content();
-  var ext = get_file_ext(decodeURI(file));
+  var ext = get_file_ext(file);
   var command = "get.file?file=" + fm.join_path() + file;
 
   var type = fm.get_file_type(ext);
@@ -431,6 +437,8 @@ function fm_get_file(file) {
       return create_image_view(elem, command);
     case fm.file_type.audio:
       return create_mp3_player(elem, command);
+    case fm.file_type.html:
+      return fm.open_file(file);
     default:
       elem.innerHTML = "unsupported file extention " + ext;
       break;
@@ -565,6 +573,8 @@ function fm_on_click(e) {
 function init_document(folder) {
 
   try {
+
+    //alert(folder);
     history.pushState(null, null, '/');
 
     fm.state.current = fm.state.navigator;
@@ -573,9 +583,9 @@ function init_document(folder) {
 
     fm.video.reset();
     fm.audio.reset();
-
-    load_async_json("get.folder?folder=" + folder + "&tm=" +(new Date).getTime(), function (data) {
-
+    
+    load_async_json("get.folder?folder=" + encodeURIComponent(folder) + "&tm=" +(new Date).getTime(), function (data) {
+      
       if (data.length === 0) {
         return fm_set_main_content(generator.generate_one(decodeURIComponent(folder), "fm-empty-folder", null));
       }
@@ -588,8 +598,7 @@ function init_document(folder) {
 
         html += generator.generate_one(item, (item.d ? "fm-list-folder-body" : "fm-list-file-body"), i);
 
-
-        var filename = encodeURI(item.name);
+        var filename = item.name;
         var ext = get_file_ext(filename);
         var type = fm.get_file_type(ext);
         switch (type) {

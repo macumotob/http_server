@@ -47,7 +47,29 @@
   <div class="container">
     <table class="table">
       <tr>
-        <td class="text-success" onclick="fm.show_ext_menu();">maxbuk.com</td>
+        <td>
+          <div class="dropdown">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+              maxbuk.com
+              <span class="caret"></span>
+            </button>
+
+            <ul class="dropdown-menu">
+              <li class="dropdown-header">Навигация</li>
+              <li><a href="#" onclick="init_document('root');">Список дисков</a></li>
+              <li><a href="#" onclick="fm_refresh();">Обновить</a></li>
+              <li class="divider"></li>
+              <li class="dropdown-header">Личное</li>
+              <li><a href="#" onclick="fm.show_notes();">Заметки</a></li>
+              <li><a href="#" onclick="fm.links.show();">Ссылки</a></li>
+              <li class="divider"></li>
+              <li class="dropdown-header">Сайты</li>
+              <li><a href="#" onclick="fm.show_servers();">Список серверов</a></li>
+              <li><a href="http://www.maxbuk.com" target="_blank">Сайт www.maxbuk.com</a></li>
+            </ul>
+          </div>
+              
+        </td>
         <td class="text-primary" onclick="init_document('root');">Home</td>
         <td class="text-primary" onclick="fm_refresh();">Refresh</td>
       </tr>
