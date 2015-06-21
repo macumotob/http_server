@@ -125,8 +125,9 @@ var img = {
   this.refresh();
 }
 , refresh: function () {
-  var path = "get.file?file=" + this.path+ this.images[this.index];
+  var path = "get.file?file=" + this.path + this.images[this.index];
   this.image.src = path;
+  this.image.alt = this.images[this.index];
   this.elem_index.innerHTML = (this.index + 1);
   this.elem_count.innerHTML = this.images.length;
 }
@@ -279,11 +280,17 @@ var fm = {
     }
   });
 }
-, dropdown_hide: function () {
-  var drop = id("#dropdown-left");
+, dropdown_hide: function (dropdown_name) {
+  var drop = id(dropdown_name);//"#dropdown-left");
   if (drop) {
     drop.removeClass("open");
   }
+}
+,hide_left_popup : function(){
+  this.dropdown_hide("#dropdown-left");
+}
+, hide_right_popup: function () {
+  this.dropdown_hide("#dropdown-right");
 }
 , offset: 0
 , last_notes: false
@@ -320,7 +327,7 @@ var fm = {
       if (info) {
         info.innerHTML = "records:" + self.offset;
       }
-      self.dropdown_hide();
+      self.dropdown_hide("#dropdown-left");
     } else {
       fm_set_main_content(generator.generate_one(data.msg, "fm-mysql-error"));
       $("#myModal").modal();
@@ -396,6 +403,9 @@ function get_file_ext(file) {
 }
 function create_image_view(parent, filename) {
 
+  fm_set_main_content(generator.gen(img.images, "images"));
+
+  return;
   load_async("/img_view.html", function (text) {
     parent.innerHTML = text;
     var elem = id("#img-view");
@@ -434,14 +444,18 @@ function create_upload_form() {
     fm_show_error(fm.errors.upload_select_folder) 
   }
   fm_set_main_content(generator.generate_one(null, "fm-upload-form"));
-  control_upload_files.click();
+  fm.hide_right_popup();
+  //control_upload_files.click();
 }
 function create_folder_form() {
 
-  return (fm.stack.length == 0 ?
-    fm_show_error(fm.errors.create_folder) 
-  : fm_set_main_content(generator.generate_one(null, "fm-create-folder"))
-    );
+  if (fm.stack.length == 0) {
+    fm_show_error(fm.errors.create_folder);
+  }
+  else {
+    fm_set_main_content(generator.generate_one(null, "fm-create-folder"));
+  }
+  fm.hide_right_popup();
 }
 function fm_get_file(file) {
 
@@ -475,6 +489,7 @@ function fm_refresh() {
     //alert('refresh:' + folder);
 
     init_document(folder);
+    fm.dropdown_hide("#dropdown-right");
   } catch (err) {
     alert('error refresh ' + err);
   }
@@ -536,7 +551,8 @@ function make_popup() {
   var html = generator.generate_one(fm.stack, "fm-popup-header", 0);
   html += generator.generate(fm.stack, "fm-popup-body");
   html += generator.generate_one(fm.stack, "fm-popup-footer",0);
-  elem.innerHTML =html;
+  elem.innerHTML = html;
+  fm.dropdown_hide("#dropdown-right");
 }
 function make_breadcrumbs() {
 
