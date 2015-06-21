@@ -165,7 +165,7 @@ var fm = {
   if ("pdf;doc;mobi;fb2;txt;epub;rtf;doc;".indexOf(ext + ';') >= 0) return this.file_type.document;
   if ("mp4;mov;3gp;ogg;avi;mkv;vob;".indexOf(ext + ';') >= 0) return this.file_type.video;
   if ("jpg;png;".indexOf(ext + ';') >= 0) return this.file_type.image;
-  if ("mp3;".indexOf(ext + ';') >= 0) return this.file_type.audio;
+  if ("mp3;3gpp;".indexOf(ext + ';') >= 0) return this.file_type.audio;
   if ("html;".indexOf(ext + ';') >= 0) return this.file_type.html;
   return this.file_type.unknown;
 }
