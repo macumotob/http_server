@@ -1,3 +1,44 @@
+
+
+var fm = require("./fmsrv.js");
+fm.load_config(process.argv[5], function (result) {
+  var config = result;
+  console.log(config);
+
+  http.createServer(function (req, res) {
+    var x = config.redirect(req);
+
+    switch (x.method) {
+      case "POST":
+        fm_process_post(x, req, res);
+        break;
+      case "GET":
+        x.send_get_response(req, res);
+        //fm_process_get(x, req, res);
+        break;
+      default:
+        console.log("ERROR METHOD :" + req.method);
+        break;
+    }
+  }).listen(config.config.port, config.config.host);
+
+});
+
+
+//function send_json(res, data) {
+//  res.writeHead(200,
+// { "Content-Type": "application/json" },
+// { "Cache-Control": "no-cache, no-store, must-revalidate" },
+// { "Pragma": "no-cache" },
+// { "Expires": -1 }
+//);
+//  res.write(JSON.stringify(data));
+//  res.end();
+//}
+
+
+
+
 var http = require("http"),
     url = require("url"),
     path = require("path"),
@@ -25,6 +66,7 @@ process.argv.forEach(function (val, index, array) {
       break;
   }
 });
+
 
 console.log("host : " + host + " port:" + port + " wd:" + wdir);
 
@@ -145,20 +187,10 @@ function send_text(res,s) {
   res.write(s);
   res.end();
 }
-function send_json(res, data) {
-  res.writeHead(200,
- { "Content-Type": "application/json" },
- { "Cache-Control": "no-cache, no-store, must-revalidate" },
- { "Pragma": "no-cache" },
- { "Expires": -1 }
-);
-  res.write(JSON.stringify(data));
-  res.end();
-}
 function send_folder_content(response, folder) {
  // console.log("send_folder_content :" + folder);
   var f = mk.get_folder_content(folder,public_folders);
-  send_json(response,f);
+  fm.send_json(response,f);
 }
 
 
@@ -167,11 +199,11 @@ function fm_create_folder(res, folder, name) {
  // console.log("fm_create_folder : " + xpath);
   try {
     fs.mkdirSync(xpath, { encoding: 'utf8' });
-    send_json(res, { result: 1, msg: "created" });
+    fm.send_json(res, { result: 1, msg: "created" });
  //   load_public_folders();
   } catch (e) {
     console.log(e.toString());
-    send_json(res, {result: 0, msg: e.toString() });
+    fm.send_json(res, {result: 0, msg: e.toString() });
   }
 }
 
@@ -585,7 +617,7 @@ function fm_process_get(x, req, res) {
       return send_file(res, x.prms.file, x.mobile);
     case "get.maket":
       // console.log(wfolder + x.prms.name);
-      mk.parse(wfolder + x.prms.name, function (data) { send_json(res, data); });
+      mk.parse(wfolder + x.prms.name, function (data) { fm.send_json(res, data); });
       return;
     case "mkdir":
       return fm_create_folder(res, x.prms.folder, x.prms.name);

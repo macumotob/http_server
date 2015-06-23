@@ -3,7 +3,7 @@
 var cnn = mysql.createConnection({
   //host: 'maxbuk.mysql.ukraine.com.ua',
   //user: 'maxbuk_db',
-  host: '192.168.0.103',
+  host: '192.168.1.5',
   port : 3306,
   user: 'maxim',
   password: 'bukshovan2009',
